@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import {
     Box,
     TextField,
@@ -11,48 +12,14 @@ import {
     faFilm,
     faLocationDot,
 } from '@fortawesome/free-solid-svg-icons';
-
-const mockupData = [
-    {
-        event_name: 'D&E WORLD TOUR FANCON - [DElight PARTY] IN HO CHI MINH',
-        image_url: 'https://i.imgur.com/ILVQADd.jpeg',
-        date: '29/07/2023',
-        location: 'Ho Chi Minh City',
-        event_type: 'Live Music',
-        price: '80.000',
-    },
-    {
-        event_name: 'D&E WORLD TOUR FANCON - [DElight PARTY] IN HO CHI MINH',
-        image_url: 'https://i.imgur.com/ILVQADd.jpeg',
-        date: '29/07/2023',
-        location: 'Ho Chi Minh City',
-        event_type: 'Live Music',
-        price: '80.000',
-    },
-    {
-        event_name: 'D&E WORLD TOUR FANCON - [DElight PARTY] IN HO CHI MINH',
-        image_url: 'https://i.imgur.com/ILVQADd.jpeg',
-        date: '29/07/2023',
-        location: 'Ho Chi Minh City',
-        event_type: 'Live Music',
-        price: '80.000',
-    },
-    {
-        event_name: 'D&E WORLD TOUR FANCON - [DElight PARTY] IN HO CHI MINH',
-        image_url: 'https://i.imgur.com/ILVQADd.jpeg',
-        date: '29/07/2023',
-        location: 'Ho Chi Minh City',
-        event_type: 'Live Music',
-        price: '80.000',
-    },
-];
+import axios from 'axios';
 
 type Type_EventItem = {
-    event_name: string;
-    image_url: string;
-    date: string;
+    title: string;
+    posterImg: string;
+    eventDate: string;
     location: string;
-    event_type: string;
+    eventType: string;
     price: string;
 };
 
@@ -77,7 +44,7 @@ const EventItem = (props: Type_EventItem) => {
             <Box
                 component="img"
                 alt="The house from the offer."
-                src={props.image_url}
+                src={props.posterImg}
             />
             <Box
                 style={{
@@ -92,10 +59,10 @@ const EventItem = (props: Type_EventItem) => {
                         marginBottom: '30px',
                     }}
                 >
-                    {props.event_name}
+                    {props.title}
                 </Typography>
 
-                {/* Price ---- Date */}
+                {/* Price ---- eventDate */}
                 <Box
                     sx={{
                         display: 'flex',
@@ -116,7 +83,7 @@ const EventItem = (props: Type_EventItem) => {
                             {props.price} VND
                         </Typography>
                     </Box>
-                    {/* Date */}
+                    {/* eventDate */}
                     <Box
                         sx={{
                             display: 'flex',
@@ -128,7 +95,7 @@ const EventItem = (props: Type_EventItem) => {
                             icon={faCalendar}
                             style={{ color: '#2DC275' }}
                         />
-                        <Typography>{props.date}</Typography>
+                        <Typography>{props.eventDate}</Typography>
                     </Box>
                 </Box>
 
@@ -151,7 +118,7 @@ const EventItem = (props: Type_EventItem) => {
                         }}
                     >
                         <FontAwesomeIcon icon={faFilm} />
-                        <Typography>{props.event_type}</Typography>
+                        <Typography>{props.eventType}</Typography>
                     </Box>
                     {/* Location */}
                     <Box
@@ -173,6 +140,20 @@ const EventItem = (props: Type_EventItem) => {
 };
 
 const LandingPage = () => {
+    const [eventList, setEventList] = useState<Array<Type_EventItem>>([])
+    useEffect(() => {
+        const FetchEvents = async () => {
+            const response = await axios.get('http://localhost:3001/events', {
+                headers : {
+                    'Access-Control-Allow-Origin': '*',
+                }
+            })
+            setEventList(response.data);
+        }
+        FetchEvents()
+    }, [])
+
+
     return (
         <Box
             sx={{
@@ -191,8 +172,17 @@ const LandingPage = () => {
                 }}
             />
             <Grid container spacing={4}>
-                {mockupData.map((event) => {
-                    return <EventItem {...event} />;
+                {eventList.map((event) => {
+                    return (
+                        <EventItem
+                            title={event.title}
+                            posterImg={event.posterImg}
+                            eventDate={event.eventDate}
+                            location='Ho Chi Minh'
+                            eventType={event.eventType}
+                            price={event.price}
+                        />
+                    );
                 })}
             </Grid>
         </Box>
