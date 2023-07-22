@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Ticket } from './Ticket';
-import { Venue } from './Venue';
+import { Seatmap } from './Seatmap';
 
 @Entity({ name: 'seat', schema: 'event booking' })
 export class Seat {
@@ -22,8 +22,8 @@ export class Seat {
   @Column()
   status: string;
 
-  @ManyToOne(() => Venue, (venue) => venue.seat)
-  venue: Venue;
+  @ManyToOne(() => Seatmap, (seatmap) => seatmap.seat)
+  seatmap: Seatmap;
 
   @OneToMany(() => Ticket, (ticket) => ticket.event)
   tickets: Ticket[];

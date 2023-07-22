@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Event } from 'src/typeorm/entities/Event';
-import { Venue } from 'src/typeorm/entities/Venue';
+import { Seatmap } from 'src/typeorm/entities/Seatmap';
 import { Repository } from 'typeorm';
 import { CreateEventDto } from '../../dto/CreateEvent.dto';
-import { CreateEventParams } from 'src/utils/types';
 
 @Injectable()
 export class EventsService {
@@ -26,12 +25,12 @@ export class EventsService {
     return filterList;
   }
 
-  createEvent(createEventParams: CreateEventParams, venue: Venue) {
+  createEvent(createEventParams: CreateEventDto, seatmap: Seatmap) {
     const newEvents = this.eventRepository.create({
       ...createEventParams,
       createTime: new Date(),
       status: true,
-      venue,
+      seatmap: seatmap,
     });
     return this.eventRepository.save(newEvents);
   }

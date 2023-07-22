@@ -6,7 +6,7 @@ import { Event } from './typeorm/entities/Event';
 import { Customer } from './typeorm/entities/Customer';
 import { Seat } from './typeorm/entities/Seat';
 import { Ticket } from './typeorm/entities/Ticket';
-import { Venue } from './typeorm/entities/Venue';
+import { Seatmap } from './typeorm/entities/Seatmap';
 import { EventsBookingModule } from './events_booking/events_booking.module';
 
 @Module({
@@ -18,7 +18,7 @@ import { EventsBookingModule } from './events_booking/events_booking.module';
       username: 'root',
       password: 'duyanpro123',
       database: 'event booking',
-      entities: [Event, Customer, Seat, Ticket, Venue],
+      entities: [Event, Customer, Seat, Ticket, Seatmap],
       synchronize: true,
     }),
     EventsBookingModule,

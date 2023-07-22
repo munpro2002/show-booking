@@ -1,12 +1,13 @@
 import {
   Column,
   Entity,
-  ManyToOne,
-  PrimaryGeneratedColumn,
+  OneToOne,
   OneToMany,
+  JoinColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Ticket } from './Ticket';
-import { Venue } from './Venue';
+import { Seatmap } from './Seatmap';
 
 @Entity({ name: 'event', schema: 'event booking' })
 export class Event {
@@ -37,8 +38,12 @@ export class Event {
   @Column()
   status: boolean;
 
-  @ManyToOne(() => Venue, (venue) => venue.event)
-  venue: Venue;
+  @Column()
+  address: string;
+
+  @OneToOne(() => Seatmap)
+  @JoinColumn()
+  seatmap: Seatmap;
 
   @OneToMany(() => Ticket, (ticket) => ticket.event)
   tickets: Ticket[];

@@ -2,45 +2,41 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Seat } from 'src/typeorm/entities/Seat';
-import { Venue } from 'src/typeorm/entities/Venue';
+import { Seatmap } from 'src/typeorm/entities/Seatmap';
 
 @Injectable()
 export class SeatsService {
   constructor(
     @InjectRepository(Seat) private seatRepository: Repository<Seat>,
-    @InjectRepository(Venue) private venueRepository: Repository<Venue>,
+    @InjectRepository(Seatmap) private seatmapRepository: Repository<Seatmap>,
   ) {}
 
-  getAllVenues() {
-    return this.venueRepository.find();
-  }
-
-  findVenue() {}
-
-  async createSeat(venue: Venue) {
+  async createSeat(seatmap: Seatmap) {
     for (let seatPos = 1; seatPos <= 100; seatPos++) {
       const seat = this.seatRepository.create({
         seatPos: seatPos,
         seatType: seatPos <= 20 ? 'normal' : seatPos <= 60 ? 'vip' : 'sweetbox',
         status: 'available',
-        venue,
+        seatmap: seatmap,
       });
       await this.seatRepository.save(seat);
+      Logger.log('hello');
     }
   }
 
-  async createVenue(address: string) {
-    Logger.log(address);
-
-    const newVenue = this.venueRepository.create({
-      address: address,
+  async createSeatmap() {
+    const newSeatmap = this.seatmapRepository.create({
       status: true,
     });
 
-    await this.venueRepository.save(newVenue);
+    await this.seatmapRepository.save(newSeatmap);
+    await this.createSeat(newSeatmap);
 
-    await this.createSeat(newVenue);
+    const seats = await this.seatRepository.find();
+    newSeatmap.seat = seats;
 
-    return newVenue;
+    await this.seatmapRepository.save(newSeatmap);
+
+    return newSeatmap;
   }
 }

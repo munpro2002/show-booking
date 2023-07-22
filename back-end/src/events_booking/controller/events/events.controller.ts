@@ -24,10 +24,8 @@ export class EventsController {
 
   @Post()
   async createEvent(@Body() createEventDto: CreateEventDto) {
-    const { address, ...eventDetails } = createEventDto;
-    Logger.log(address);
+    const seatmap = await this.seatService.createSeatmap();
 
-    const venue = await this.seatService.createVenue(address);
-    this.eventService.createEvent(eventDetails, venue);
+    return this.eventService.createEvent(createEventDto, seatmap);
   }
 }
