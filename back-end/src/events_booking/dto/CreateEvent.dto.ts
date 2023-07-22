@@ -1,10 +1,10 @@
 export class CreateEventDto {
-  id: number;
+  id: string;
   title: string;
   price: number;
   eventType: string;
   eventDate: string;
   posterImg: string;
-  status: boolean;
-  createTime: Date;
+  location: string;
+  address: string; //venue address
 }
