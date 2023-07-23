@@ -10,16 +10,16 @@ export class EventsController {
     private seatService: SeatsService,
   ) {}
 
+  @Get()
+  getEvent() {
+    return this.eventService.getAllEvents();
+  }
+
   @Get('search')
   getFilterEvents(@Query('query') query: string) {
     Logger.log(this.eventService.findFilterEvents(query));
 
     return this.eventService.findFilterEvents(query);
-  }
-
-  @Get()
-  getEvent() {
-    return this.eventService.getAllEvents();
   }
 
   @Post()

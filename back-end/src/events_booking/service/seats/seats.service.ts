@@ -11,16 +11,22 @@ export class SeatsService {
     @InjectRepository(Seatmap) private seatmapRepository: Repository<Seatmap>,
   ) {}
 
+  async findTicketSeat(seat_id: string) {
+    const seat = await this.seatRepository.findOne({ where: { id: seat_id } });
+
+    seat.status = 'progress';
+
+    return this.seatRepository.save(seat);
+  }
+
   async createSeat(seatmap: Seatmap) {
     for (let seatPos = 1; seatPos <= 100; seatPos++) {
       const seat = this.seatRepository.create({
         seatPos: seatPos,
         seatType: seatPos <= 20 ? 'normal' : seatPos <= 60 ? 'vip' : 'sweetbox',
-        status: 'available',
         seatmap: seatmap,
       });
       await this.seatRepository.save(seat);
-      Logger.log('hello');
     }
   }
 

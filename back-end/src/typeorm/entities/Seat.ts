@@ -5,7 +5,6 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Ticket } from './Ticket';
 import { Seatmap } from './Seatmap';
 
 @Entity({ name: 'seat', schema: 'event booking' })
@@ -19,12 +18,9 @@ export class Seat {
   @Column()
   seatType: string;
 
-  @Column()
+  @Column({ default: 'available' })
   status: string;
 
   @ManyToOne(() => Seatmap, (seatmap) => seatmap.seat)
   seatmap: Seatmap;
-
-  @OneToMany(() => Ticket, (ticket) => ticket.event)
-  tickets: Ticket[];
 }

@@ -15,6 +15,10 @@ export class EventsService {
     return this.eventRepository.find();
   }
 
+  findEvent(event_id: string) {
+    return this.eventRepository.findOne({ where: { id: event_id } });
+  }
+
   async findFilterEvents(searchKeyWord: string) {
     const eventsList = await this.getAllEvents();
 
