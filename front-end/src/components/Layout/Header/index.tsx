@@ -45,7 +45,7 @@ const Header = () => {
                                 href={route.path}
                                 sx={{
                                     backgroundColor: window.location.pathname !== '/' && window.location.pathname.includes(route.path) ?
-                                    'blue' : '',
+                                    '#2DC275' : '',
                                     textDecoration: 'none',
                                     color: 'white',
                                     borderRadius: '0px',
@@ -53,7 +53,8 @@ const Header = () => {
                                     fontWeight: 'bold',
                                     cursor: 'pointer',
                                     '&:hover': {
-                                        backgroundColor: 'gray',
+                                        backgroundColor: window.location.pathname !== '/' && window.location.pathname.includes(route.path) ?
+                                        '#2DC275' : 'gray',
                                     }
                                 }}
                             >

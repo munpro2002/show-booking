@@ -6,7 +6,7 @@ import {
 const EventReportPage = () => {
     return (
         <Box>
-            <Typography>Hello</Typography>
+            
         </Box>
     )
 }

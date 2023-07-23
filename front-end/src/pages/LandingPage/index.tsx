@@ -4,7 +4,7 @@ import {
     TextField,
     Grid,
     Typography,
-    CircularProgress
+    CircularProgress,
 } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -22,6 +22,24 @@ type Type_EventItem = {
     eventType: string;
     price: string;
 };
+
+type handleGetAllEvents = () => [Type_EventItem]
+
+type handleSearchEvent = (keyword: string) => [Type_EventItem]
+
+const handleGetAllEvents = async () => {
+    const response = await axios.get('http://localhost:3001/events')
+    return response.data
+}
+
+const handleSearchEvent = async (keyword: string) => {
+    const response = await axios.get('http://localhost:3001/events/search', {
+        params: {
+            query: keyword
+        }
+    })
+    return response.data
+}
 
 const EventItem = (props: Type_EventItem) => {
     return (
@@ -41,22 +59,29 @@ const EventItem = (props: Type_EventItem) => {
                 },
             }}
         >
+            {/* Poster image */}
             <Box
                 component="img"
-                alt="The house from the offer."
+                alt={props.title}
                 src={props.posterImg}
+                sx={{
+                    marginBottom: '10px'
+                }}
             />
+
+            {/* Main content */}
             <Box
-                style={{
-                    padding: '20px',
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px'
                 }}
             >
-                {/* Event name */}
+                {/* Event title */}
                 <Typography
                     variant="h6"
                     sx={{
                         fontWeight: 'bold',
-                        marginBottom: '30px',
                     }}
                 >
                     {props.title}
@@ -68,7 +93,6 @@ const EventItem = (props: Type_EventItem) => {
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        marginBottom: '20px',
                     }}
                 >
                     {/* Price */}
@@ -105,7 +129,6 @@ const EventItem = (props: Type_EventItem) => {
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        marginBottom: '20px',
                         color: '#828282',
                     }}
                 >
@@ -140,19 +163,15 @@ const EventItem = (props: Type_EventItem) => {
 };
 
 const LandingPage = () => {
-    const [eventList, setEventList] = useState<Array<Type_EventItem>>([])
+    const [loading, setIsLoading] = useState(false)
+    const [eventList, setEventList] = useState<Array<Type_EventItem>>([]);
     useEffect(() => {
         const FetchEvents = async () => {
-            const response = await axios.get('http://localhost:3001/events', {
-                headers : {
-                    'Access-Control-Allow-Origin': '*',
-                }
-            })
-            setEventList(response.data);
-        }
-        FetchEvents()
-    }, [])
-
+            const eventGetAllResult = await handleGetAllEvents()
+            setEventList(eventGetAllResult);
+        };
+        FetchEvents();
+    }, []);
 
     return (
         <Box
@@ -165,26 +184,53 @@ const LandingPage = () => {
                 gap: '30px',
             }}
         >
+            {/* Search event */}
             <TextField
                 placeholder="Search events..."
+                onChange={async (event) => {
+                    setIsLoading(true);
+                    let eventSearchResult: [Type_EventItem];
+                    if (event.currentTarget.value === '') {
+                        eventSearchResult = await handleGetAllEvents()
+                    } else {
+                        eventSearchResult= await handleSearchEvent(event.currentTarget.value)
+                    }
+                    setEventList(eventSearchResult)
+                    setTimeout(() => setIsLoading(false), 500);
+                }}
                 sx={{
                     width: '250px',
                 }}
             />
-            <Grid container spacing={4}>
-                {eventList.map((event) => {
-                    return (
-                        <EventItem
-                            title={event.title}
-                            posterImg={event.posterImg}
-                            eventDate={event.eventDate}
-                            location='Ho Chi Minh'
-                            eventType={event.eventType}
-                            price={event.price}
-                        />
-                    );
-                })}
-            </Grid>
+
+            {/* Main page */}
+            {
+                loading ?  
+                <CircularProgress
+                    sx={{
+                        color: '#2DC275'
+                    }}
+                /> :
+                (
+                    eventList.length === 0 ? 
+                    <Typography>No result found</Typography> :
+                    <Grid container spacing={4}>
+                        {eventList.map((event, index) => {
+                            return (
+                                <EventItem
+                                    key={index}
+                                    title={event.title}
+                                    posterImg={event.posterImg}
+                                    eventDate='29/07/2023'
+                                    location="Ho Chi Minh"
+                                    eventType={event.eventType}
+                                    price={event.price}
+                                />
+                            );
+                        })}
+                    </Grid>
+                )
+            }
         </Box>
     );
 };
