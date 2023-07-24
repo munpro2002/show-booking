@@ -17,7 +17,7 @@ import { EventsBookingModule } from './events_booking/events_booking.module';
       port: 3306,
       username: 'root',
       password: 'duyanpro123',
-      database: 'event booking',
+      database: 'eventbooking',
       entities: [Event, Customer, Seat, Ticket, Seatmap],
       synchronize: true,
     }),
