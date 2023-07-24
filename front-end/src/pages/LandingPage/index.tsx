@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
     Box,
     TextField,
@@ -23,6 +23,10 @@ type Type_EventItem = {
     location: string;
     eventType: string;
     price: string;
+    seatmap: {
+        id: string;
+        status: boolean;
+    }
 };
 
 // type handleGetAllEvents = () => [Type_EventItem];
@@ -48,7 +52,7 @@ const EventItem = (props: Type_EventItem) => {
 
     return (
         <Grid item xl={3} md={4} sm={6} xs={12}
-            onClick={() => navigate(`/event_detail/${props.id}`, { state: { id: props.id, title: props.title } })}
+            onClick={() => navigate(`/event_detail/${props.id}`, { state: { event: props } })}
             sx={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -108,7 +112,7 @@ const EventItem = (props: Type_EventItem) => {
                                 fontWeight: 'bold',
                             }}
                         >
-                            {props.price} VND
+                            {props.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} VND
                         </Typography>
                     </Box>
                     {/* eventDate */}
@@ -231,6 +235,7 @@ const LandingPage = () => {
                                 location="Ho Chi Minh"
                                 eventType={event.eventType}
                                 price={event.price}
+                                seatmap={event.seatmap}
                             />
                         );
                     })}
