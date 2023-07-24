@@ -10,6 +10,7 @@ import {
 import { CreateEventDto } from 'src/events_booking/dto/CreateEvent.dto';
 import { EventsService } from 'src/events_booking/service/events/events.service';
 import { SeatsService } from 'src/events_booking/service/seats/seats.service';
+const cloudinary = require('../../../utils/cloudinary');
 
 @Controller('events')
 export class EventsController {
@@ -37,6 +38,21 @@ export class EventsController {
 
   @Post('create_event')
   async createEvent(@Body() createEventDto: CreateEventDto) {
+    const { posterImg, address } = createEventDto;
+
+    Logger.log(address);
+
+    const result = await cloudinary.uploader.upload(posterImg, {
+      folder: 'event_poster',
+    });
+
+    Logger.log(result);
+
+    createEventDto = {
+      ...createEventDto,
+      posterImg: result.url,
+    };
+
     const seatmap = await this.seatService.createSeatmap();
     this.eventService.createEvent(createEventDto, seatmap);
   }
