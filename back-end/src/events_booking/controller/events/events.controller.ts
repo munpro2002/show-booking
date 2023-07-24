@@ -13,6 +13,7 @@ export class EventsController {
   @Get()
   getEvent() {
     return this.eventService.getAllEvents();
+    Logger.log("hello")
   }
 
   @Get('search')
