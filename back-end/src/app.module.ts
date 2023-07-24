@@ -2,8 +2,12 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Events } from './typeorm/entities/Events';
-import { EventsModule } from './events/events.module';
+import { Event } from './typeorm/entities/Event';
+import { Customer } from './typeorm/entities/Customer';
+import { Seat } from './typeorm/entities/Seat';
+import { Ticket } from './typeorm/entities/Ticket';
+import { Seatmap } from './typeorm/entities/Seatmap';
+import { EventsBookingModule } from './events_booking/events_booking.module';
 
 @Module({
   imports: [
@@ -14,10 +18,10 @@ import { EventsModule } from './events/events.module';
       username: 'root',
       password: 'Tonkin01262001',
       database: 'eventbooking',
-      entities: [Events],
+      entities: [Event, Customer, Seat, Ticket, Seatmap],
       synchronize: true,
     }),
-    EventsModule,
+    EventsBookingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
