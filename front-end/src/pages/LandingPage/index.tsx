@@ -28,12 +28,12 @@ type handleGetAllEvents = () => [Type_EventItem]
 type handleSearchEvent = (keyword: string) => [Type_EventItem]
 
 const handleGetAllEvents = async () => {
-    const response = await axios.get('http://localhost:3001/events')
+    const response = await axios.get('http://localhost:3000/events')
     return response.data
 }
 
 const handleSearchEvent = async (keyword: string) => {
-    const response = await axios.get('http://localhost:3001/events/search', {
+    const response = await axios.get('http://localhost:3000/events/search', {
         params: {
             query: keyword
         }
