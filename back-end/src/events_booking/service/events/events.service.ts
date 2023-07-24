@@ -12,7 +12,7 @@ export class EventsService {
   ) {}
 
   getAllEvents() {
-    return this.eventRepository.find();
+    return this.eventRepository.find({ relations: ['seatmap'] });
   }
 
   findEvent(event_id: string) {
@@ -33,9 +33,8 @@ export class EventsService {
     const newEvents = this.eventRepository.create({
       ...createEventParams,
       createTime: new Date(),
-      status: true,
       seatmap: seatmap,
     });
-    return this.eventRepository.save(newEvents);
+    this.eventRepository.save(newEvents);
   }
 }

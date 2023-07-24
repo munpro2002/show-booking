@@ -35,7 +35,7 @@ export class Event {
   @Column()
   createTime: Date;
 
-  @Column()
+  @Column({ default: true })
   status: boolean;
 
   @Column()

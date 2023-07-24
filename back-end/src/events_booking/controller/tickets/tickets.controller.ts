@@ -19,7 +19,7 @@ export class TicketsController {
     return this.ticketService.getAllTickets();
   }
 
-  @Post()
+  @Post('create_ticket')
   async createTicket(@Body() createTicketDto: CreateTicketDto) {
     const { seats_id, event_id, ...customer_info } = createTicketDto;
 

@@ -19,6 +19,13 @@ export class SeatsService {
     return this.seatRepository.save(seat);
   }
 
+  async findSeatmap(seatmap_id: string) {
+    return this.seatmapRepository.findOne({
+      where: { id: seatmap_id },
+      relations: ['seat'],
+    });
+  }
+
   async createSeat(seatmap: Seatmap) {
     for (let seatPos = 1; seatPos <= 100; seatPos++) {
       const seat = this.seatRepository.create({
@@ -31,9 +38,7 @@ export class SeatsService {
   }
 
   async createSeatmap() {
-    const newSeatmap = this.seatmapRepository.create({
-      status: true,
-    });
+    const newSeatmap = this.seatmapRepository.create();
 
     await this.seatmapRepository.save(newSeatmap);
     await this.createSeat(newSeatmap);
