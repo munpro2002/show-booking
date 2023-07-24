@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link, useNavigate } from "react-router-dom";
 import {
     Box,
     TextField,
@@ -15,6 +16,7 @@ import {
 import axios from 'axios';
 
 type Type_EventItem = {
+    id: string;
     title: string;
     posterImg: string;
     eventDate: string;
@@ -23,49 +25,51 @@ type Type_EventItem = {
     price: string;
 };
 
-type handleGetAllEvents = () => [Type_EventItem]
+// type handleGetAllEvents = () => [Type_EventItem];
 
-type handleSearchEvent = (keyword: string) => [Type_EventItem]
+// type handleSearchEvent = (keyword: string) => [Type_EventItem];
 
 const handleGetAllEvents = async () => {
-    const response = await axios.get('http://localhost:3000/events')
-    return response.data
-}
+    const response = await axios.get('http://localhost:3000/events');
+    return response.data;
+};
 
 const handleSearchEvent = async (keyword: string) => {
     const response = await axios.get('http://localhost:3000/events/search', {
         params: {
-            query: keyword
-        }
-    })
-    return response.data
-}
+            query: keyword,
+        },
+    });
+    return response.data;
+};
 
 const EventItem = (props: Type_EventItem) => {
+    const navigate = useNavigate();
+
     return (
-        <Grid
-            item
-            xl={3}
-            md={4}
-            sm={6}
-            xs={12}
+        <Grid item xl={3} md={4} sm={6} xs={12}
+            onClick={() => navigate(`/event_detail/${props.id}`, { state: { id: props.id, title: props.title } })}
             sx={{
                 display: 'flex',
                 flexDirection: 'column',
                 cursor: 'pointer',
                 transition: 'transform 0.3s',
+                maxHeight: '500px',
+                alignContent: 'space-between',
+                justifyContent: 'space-between',
                 '&:hover': {
                     opacity: 0.5,
                 },
             }}
         >
+            
             {/* Poster image */}
             <Box
                 component="img"
                 alt={props.title}
                 src={props.posterImg}
                 sx={{
-                    marginBottom: '10px'
+                    marginBottom: '10px',
                 }}
             />
 
@@ -74,7 +78,7 @@ const EventItem = (props: Type_EventItem) => {
                 sx={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '10px'
+                    gap: '10px',
                 }}
             >
                 {/* Event title */}
@@ -163,11 +167,11 @@ const EventItem = (props: Type_EventItem) => {
 };
 
 const LandingPage = () => {
-    const [loading, setIsLoading] = useState(false)
+    const [loading, setIsLoading] = useState(false);
     const [eventList, setEventList] = useState<Array<Type_EventItem>>([]);
     useEffect(() => {
         const FetchEvents = async () => {
-            const eventGetAllResult = await handleGetAllEvents()
+            const eventGetAllResult = await handleGetAllEvents();
             setEventList(eventGetAllResult);
         };
         FetchEvents();
@@ -191,11 +195,13 @@ const LandingPage = () => {
                     setIsLoading(true);
                     let eventSearchResult: [Type_EventItem];
                     if (event.currentTarget.value === '') {
-                        eventSearchResult = await handleGetAllEvents()
+                        eventSearchResult = await handleGetAllEvents();
                     } else {
-                        eventSearchResult= await handleSearchEvent(event.currentTarget.value)
+                        eventSearchResult = await handleSearchEvent(
+                            event.currentTarget.value
+                        );
                     }
-                    setEventList(eventSearchResult)
+                    setEventList(eventSearchResult);
                     setTimeout(() => setIsLoading(false), 500);
                 }}
                 sx={{
@@ -204,33 +210,32 @@ const LandingPage = () => {
             />
 
             {/* Main page */}
-            {
-                loading ?  
+            {loading ? (
                 <CircularProgress
                     sx={{
-                        color: '#2DC275'
+                        color: '#2DC275',
                     }}
-                /> :
-                (
-                    eventList.length === 0 ? 
-                    <Typography>No result found</Typography> :
-                    <Grid container spacing={4}>
-                        {eventList.map((event, index) => {
-                            return (
-                                <EventItem
-                                    key={index}
-                                    title={event.title}
-                                    posterImg={event.posterImg}
-                                    eventDate='29/07/2023'
-                                    location="Ho Chi Minh"
-                                    eventType={event.eventType}
-                                    price={event.price}
-                                />
-                            );
-                        })}
-                    </Grid>
-                )
-            }
+                />
+            ) : eventList.length === 0 ? (
+                <Typography>No result found</Typography>
+            ) : (
+                <Grid container spacing={4}>
+                    {eventList.map((event, index) => {
+                        return (
+                            <EventItem
+                                key={index}
+                                id={event.id}
+                                title={event.title}
+                                posterImg={event.posterImg}
+                                eventDate="29/07/2023"
+                                location="Ho Chi Minh"
+                                eventType={event.eventType}
+                                price={event.price}
+                            />
+                        );
+                    })}
+                </Grid>
+            )}
         </Box>
     );
 };

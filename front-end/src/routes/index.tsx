@@ -10,7 +10,7 @@ const routes = [
     { 'name': 'Home', 'path': '/browse_event', 'component': <LandingPage/> },
     { 'name': 'Create Event', 'path': '/create_event', 'component': <CreateEventPage/> },
     { 'name': 'Event Report', 'path': '/event_report', 'component': <EventReportPage/> },
-    { 'path': '/event_detail', 'component': <EventDetailPage/> },
+    { 'path': '/event_detail/:id', 'component': <EventDetailPage/> },
     { 'path': '/event_booking', 'component': <EventBookingPage/> }
 ]
 
