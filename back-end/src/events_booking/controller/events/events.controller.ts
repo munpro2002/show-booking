@@ -10,13 +10,16 @@ import {
 import { CreateEventDto } from 'src/events_booking/dto/CreateEvent.dto';
 import { EventsService } from 'src/events_booking/service/events/events.service';
 import { SeatsService } from 'src/events_booking/service/seats/seats.service';
-const cloudinary = require('../../../utils/cloudinary');
+import { UploadedFile, UseInterceptors } from '@nestjs/common/decorators';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CloudinaryService } from 'src/events_booking/cloudinary/Cloudinary.service';
 
 @Controller('events')
 export class EventsController {
   constructor(
     private eventService: EventsService,
     private seatService: SeatsService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   @Get()
@@ -37,21 +40,14 @@ export class EventsController {
   }
 
   @Post('create_event')
-  async createEvent(@Body() createEventDto: CreateEventDto) {
-    const { posterImg, address } = createEventDto;
+  @UseInterceptors(FileInterceptor('posterImg'))
+  async createEvent(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createEventDto: CreateEventDto,
+  ) {
+    const result = await this.cloudinaryService.uploadFile(file);
 
-    Logger.log(address);
-
-    const result = await cloudinary.uploader.upload(posterImg, {
-      folder: 'event_poster',
-    });
-
-    Logger.log(result);
-
-    createEventDto = {
-      ...createEventDto,
-      posterImg: result.url,
-    };
+    createEventDto.posterImg = result.url;
 
     const seatmap = await this.seatService.createSeatmap();
     this.eventService.createEvent(createEventDto, seatmap);
