@@ -1,107 +1,106 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 import {
     Box,
     TextField,
     Grid,
     Typography,
-    CircularProgress
+    CircularProgress,
 } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    faCalendar,
+    faCalendarDays,
     faFilm,
     faLocationDot,
 } from '@fortawesome/free-solid-svg-icons';
-
-const mockupData = [
-    {
-        event_name: 'D&E WORLD TOUR FANCON - [DElight PARTY] IN HO CHI MINH',
-        image_url: 'https://i.imgur.com/ILVQADd.jpeg',
-        date: '29/07/2023',
-        location: 'Ho Chi Minh City',
-        event_type: 'Live Music',
-        price: '80.000',
-    },
-    {
-        event_name: 'D&E WORLD TOUR FANCON - [DElight PARTY] IN HO CHI MINH',
-        image_url: 'https://i.imgur.com/ILVQADd.jpeg',
-        date: '29/07/2023',
-        location: 'Ho Chi Minh City',
-        event_type: 'Live Music',
-        price: '80.000',
-    },
-    {
-        event_name: 'D&E WORLD TOUR FANCON - [DElight PARTY] IN HO CHI MINH',
-        image_url: 'https://i.imgur.com/ILVQADd.jpeg',
-        date: '29/07/2023',
-        location: 'Ho Chi Minh City',
-        event_type: 'Live Music',
-        price: '80.000',
-    },
-    {
-        event_name: 'D&E WORLD TOUR FANCON - [DElight PARTY] IN HO CHI MINH',
-        image_url: 'https://i.imgur.com/ILVQADd.jpeg',
-        date: '29/07/2023',
-        location: 'Ho Chi Minh City',
-        event_type: 'Live Music',
-        price: '80.000',
-    },
-];
+import axios from 'axios';
 
 type Type_EventItem = {
-    event_name: string;
-    image_url: string;
-    date: string;
+    id: string;
+    title: string;
+    posterImg: string;
+    eventDate: string;
     location: string;
-    event_type: string;
+    eventType: string;
     price: string;
+    seatmap: {
+        id: string;
+        status: boolean;
+    }
+};
+
+// type handleGetAllEvents = () => [Type_EventItem];
+
+// type handleSearchEvent = (keyword: string) => [Type_EventItem];
+
+const handleGetAllEvents = async () => {
+    const response = await axios.get('http://localhost:3000/events');
+    return response.data;
+};
+
+const handleSearchEvent = async (keyword: string) => {
+    const response = await axios.get('http://localhost:3000/events/search', {
+        params: {
+            query: keyword,
+        },
+    });
+    return response.data;
 };
 
 const EventItem = (props: Type_EventItem) => {
+    const navigate = useNavigate();
+
     return (
-        <Grid
-            item
-            xl={3}
-            md={4}
-            sm={6}
-            xs={12}
+        <Grid item xl={3} md={4} sm={6} xs={12}
+            onClick={() => navigate(`/event_detail/${props.id}`, { state: { event: props } })}
             sx={{
                 display: 'flex',
                 flexDirection: 'column',
                 cursor: 'pointer',
                 transition: 'transform 0.3s',
+                maxHeight: '500px',
+                alignContent: 'space-between',
+                justifyContent: 'space-between',
                 '&:hover': {
                     opacity: 0.5,
                 },
             }}
         >
+            
+            {/* Poster image */}
             <Box
                 component="img"
-                alt="The house from the offer."
-                src={props.image_url}
+                alt={props.title}
+                src={props.posterImg}
+                sx={{
+                    marginBottom: '10px',
+                }}
             />
+
+            {/* Main content */}
             <Box
-                style={{
-                    padding: '20px',
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px',
                 }}
             >
-                {/* Event name */}
+                {/* Event title */}
                 <Typography
                     variant="h6"
                     sx={{
                         fontWeight: 'bold',
-                        marginBottom: '30px',
                     }}
                 >
-                    {props.event_name}
+                    {props.title}
                 </Typography>
 
-                {/* Price ---- Date */}
+                {/* Price ---- eventDate */}
                 <Box
                     sx={{
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        marginBottom: '20px',
                     }}
                 >
                     {/* Price */}
@@ -113,10 +112,10 @@ const EventItem = (props: Type_EventItem) => {
                                 fontWeight: 'bold',
                             }}
                         >
-                            {props.price} VND
+                            {props.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} VND
                         </Typography>
                     </Box>
-                    {/* Date */}
+                    {/* eventDate */}
                     <Box
                         sx={{
                             display: 'flex',
@@ -125,10 +124,10 @@ const EventItem = (props: Type_EventItem) => {
                         }}
                     >
                         <FontAwesomeIcon
-                            icon={faCalendar}
+                            icon={faCalendarDays}
                             style={{ color: '#2DC275' }}
                         />
-                        <Typography>{props.date}</Typography>
+                        <Typography>{props.eventDate}</Typography>
                     </Box>
                 </Box>
 
@@ -138,7 +137,6 @@ const EventItem = (props: Type_EventItem) => {
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        marginBottom: '20px',
                         color: '#828282',
                     }}
                 >
@@ -151,7 +149,7 @@ const EventItem = (props: Type_EventItem) => {
                         }}
                     >
                         <FontAwesomeIcon icon={faFilm} />
-                        <Typography>{props.event_type}</Typography>
+                        <Typography>{props.eventType}</Typography>
                     </Box>
                     {/* Location */}
                     <Box
@@ -173,6 +171,16 @@ const EventItem = (props: Type_EventItem) => {
 };
 
 const LandingPage = () => {
+    const [loading, setIsLoading] = useState(false);
+    const [eventList, setEventList] = useState<Array<Type_EventItem>>([]);
+    useEffect(() => {
+        const FetchEvents = async () => {
+            const eventGetAllResult = await handleGetAllEvents();
+            setEventList(eventGetAllResult);
+        };
+        FetchEvents();
+    }, []);
+
     return (
         <Box
             sx={{
@@ -184,17 +192,55 @@ const LandingPage = () => {
                 gap: '30px',
             }}
         >
+            {/* Search event */}
             <TextField
                 placeholder="Search events..."
+                onChange={async (event) => {
+                    setIsLoading(true);
+                    let eventSearchResult: [Type_EventItem];
+                    if (event.currentTarget.value === '') {
+                        eventSearchResult = await handleGetAllEvents();
+                    } else {
+                        eventSearchResult = await handleSearchEvent(
+                            event.currentTarget.value
+                        );
+                    }
+                    setEventList(eventSearchResult);
+                    setTimeout(() => setIsLoading(false), 500);
+                }}
                 sx={{
                     width: '250px',
                 }}
             />
-            <Grid container spacing={4}>
-                {mockupData.map((event) => {
-                    return <EventItem {...event} />;
-                })}
-            </Grid>
+
+            {/* Main page */}
+            {loading ? (
+                <CircularProgress
+                    sx={{
+                        color: '#2DC275',
+                    }}
+                />
+            ) : eventList.length === 0 ? (
+                <Typography>No event found</Typography>
+            ) : (
+                <Grid container spacing={4}>
+                    {eventList.map((event, index) => {
+                        return (
+                            <EventItem
+                                key={index}
+                                id={event.id}
+                                title={event.title}
+                                posterImg={event.posterImg}
+                                eventDate="29/07/2023"
+                                location="Ho Chi Minh"
+                                eventType={event.eventType}
+                                price={event.price}
+                                seatmap={event.seatmap}
+                            />
+                        );
+                    })}
+                </Grid>
+            )}
         </Box>
     );
 };
