@@ -13,11 +13,11 @@ import { EventsBookingModule } from './events_booking/events_booking.module';
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
+      host: '103.200.23.139',
       port: 3306,
-      username: 'root',
-      password: 'duyanpro123',
-      database: 'eventbooking',
+      username: 'aaronduc_admin',
+      password: 'chungtakhongthuocvenhau',
+      database: 'aaronduc_eventbooking',
       entities: [Event, Customer, Seat, Ticket, Seatmap],
       synchronize: true,
     }),
