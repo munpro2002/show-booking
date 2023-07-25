@@ -32,7 +32,12 @@ const handleCreateEvent = async (formData: any) => {
             eventDate: formData.eventdate,
             posterImg: formData.posterImg,
             address: ''
-        })
+        }, {
+            headers:{
+                'Content-Type':'multipart/form-data'
+            }
+        }
+        )
     } catch (err) {
         console.log(err)
     }
