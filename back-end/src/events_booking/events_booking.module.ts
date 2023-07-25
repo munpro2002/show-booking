@@ -11,10 +11,19 @@ import { Customer } from 'src/typeorm/entities/Customer';
 import { TicketsController } from './controller/tickets/tickets.controller';
 import { TicketsService } from './service/tickets/tickets.service';
 import { CustomersService } from './service/customers/customers.service';
+import { CloudinaryService } from './cloudinary/Cloudinary.service';
+import { CloudinaryProvider } from './cloudinary/Cloudinary.provider';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Event, Seat, Seatmap, Ticket, Customer])],
   controllers: [EventsController, TicketsController],
-  providers: [EventsService, SeatsService, TicketsService, CustomersService],
+  providers: [
+    EventsService,
+    SeatsService,
+    TicketsService,
+    CustomersService,
+    CloudinaryProvider,
+    CloudinaryService,
+  ],
 })
 export class EventsBookingModule {}

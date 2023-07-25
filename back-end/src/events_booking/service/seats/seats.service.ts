@@ -20,9 +20,15 @@ export class SeatsService {
   }
 
   async findSeatmap(seatmap_id: string) {
-    return this.seatmapRepository.findOne({
+    const seatmap = await this.seatmapRepository.findOne({
       where: { id: seatmap_id },
-      relations: ['seat'],
+    });
+
+    return await this.seatRepository.find({
+      where: {
+        seatmap: seatmap,
+        status: 'progress' || 'unavailable',
+      },
     });
   }
 
