@@ -221,7 +221,7 @@ const LandingPage = () => {
                     }}
                 />
             ) : eventList.length === 0 ? (
-                <Typography>No result found</Typography>
+                <Typography>No event found</Typography>
             ) : (
                 <Grid container spacing={4}>
                     {eventList.map((event, index) => {

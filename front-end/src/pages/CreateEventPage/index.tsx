@@ -6,6 +6,8 @@ import {
     InputAdornment,
     Button,
     InputLabel,
+    Alert,
+    Grid,
 } from '@mui/material';
 import {
     faFilm,
@@ -19,22 +21,59 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import axios from 'axios';
 
+const handleCreateEvent = async (formData: any) => {
+    try {
+        console.log(formData)
+        axios.post('http://localhost:3000/events/create_event', {
+            title: formData.eventtitle,
+            eventType: formData.eventtype,
+            location: formData.location,
+            price: formData.price,
+            eventDate: formData.eventdate,
+            posterImg: formData.posterImg,
+            address: ''
+        })
+    } catch (err) {
+        console.log(err)
+    }
+};
+
 const EventInputField = (props: any) => {
     const [focused, setFocuses] = useState(false);
     const IconMapping: { [key: string]: React.ReactElement } = {
-        eventtitle: <FontAwesomeIcon icon={faVolleyball} color={focused ? '#2DC275' : ''}/>,
-        eventtype: <FontAwesomeIcon icon={faFilm} color={focused ? '#2DC275' : ''}/>,
-        location: <FontAwesomeIcon icon={faLocationDot} color={focused ? '#2DC275' : ''}/>,
-        'price(vnd)': <FontAwesomeIcon icon={faDollarSign} color={focused ? '#2DC275' : ''} />,
+        eventtitle: (
+            <FontAwesomeIcon
+                icon={faVolleyball}
+                color={focused ? '#2DC275' : ''}
+            />
+        ),
+        eventtype: (
+            <FontAwesomeIcon icon={faFilm} color={focused ? '#2DC275' : ''} />
+        ),
+        location: (
+            <FontAwesomeIcon
+                icon={faLocationDot}
+                color={focused ? '#2DC275' : ''}
+            />
+        ),
+        price: (
+            <FontAwesomeIcon
+                icon={faDollarSign}
+                color={focused ? '#2DC275' : ''}
+            />
+        ),
     };
-    const iconType = props.type.replace(/\s/g, '').toLowerCase();
+    const lowercaseType = props.type.replace(/\s/g, '').toLowerCase();
 
     return (
         <TextField
             fullWidth
+            value={props.formData[lowercaseType]}
+            onChange={(event) => props.setFormData({...props.formData, [lowercaseType]: event.target.value})}
+            type={props.type === 'Price' ? 'number' : 'text'}
             onFocus={() => setFocuses(true)}
             onBlur={() => setFocuses(false)}
-            label={props.type}
+            label={props.type + (props.type === 'Price' ? ' (VND)' : '')}
             sx={{
                 '& .MuiInputLabel-root.Mui-focused': {
                     color: '#2DC275',
@@ -47,7 +86,7 @@ const EventInputField = (props: any) => {
             InputProps={{
                 startAdornment: (
                     <InputAdornment position="start">
-                        {IconMapping[iconType]}
+                        {IconMapping[lowercaseType]}
                     </InputAdornment>
                 ),
             }}
@@ -56,12 +95,15 @@ const EventInputField = (props: any) => {
 };
 
 const CreateEventPage = () => {
-    const [selectedFile, setSelectedFile] = useState<any>(null);
-
-    const handleFileChange = (event: any) => {
-        const file = event.target.files[0];
-        setSelectedFile(file);
-    };
+    const [alert, setAlert] = useState('')
+    const [formData, setFormData] = useState({
+        eventtitle: '',
+        eventtype: '',
+        location: '',
+        price: '',
+        eventdate: '' as string || null,
+        posterImg: null as any
+    });
 
     return (
         <Box
@@ -86,56 +128,30 @@ const CreateEventPage = () => {
             </Typography>
 
             {/* Fields */}
-            <Box
+            <Grid
+                container
+                spacing={2}
                 sx={{
-                    padding: '20px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '20px',
-                    border: '3px solid #2DC275',
+                    width: '50%',
+                    padding: '20px 20px 30px 0px',
                     borderRadius: 2,
-                    width: '20%',
                 }}
             >
-                {/* Text fields */}
-                {['Event title', 'Event type', 'Location', 'Price (VND)'].map(
-                    (type, index) => {
-                        return <EventInputField key={index} type={type} />;
-                    }
-                )}
-
-                {/* Event date */}
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                        label="Event date"
-                        sx={{
-                            width: '100%',
-                            '& .MuiInputLabel-root.Mui-focused': {
-                                color: '#2DC275',
-                            },
-                            '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
-                                {
-                                    borderColor: '#2DC275',
-                                },
-                        }}
-                    />
-                </LocalizationProvider>
-
-                {/* File upload input */}
-                <Box
+                {/* Left field */}
+                <Grid item xs={6}
                     sx={{
-                        width: '100%',
                         display: 'flex',
+                        flexDirection: 'column',
                         alignItems: 'center',
-                        justifyContent: 'flex-start',
-                        gap: 2,
+                        gap: '20px',
                     }}
                 >
-                    <InputLabel>Poster image</InputLabel>
-                    <Button
-                        component="label"
+                    <EventInputField type="Event title" formData={formData} setFormData={setFormData}/>
+                    <EventInputField type="Location" formData={formData} setFormData={setFormData}/>
+                    <Button component="label"
                         sx={{
+                            fontSize: 10,
+                            width: '50%',
                             backgroundColor: '#2DC275',
                             p: 1,
                             color: 'white',
@@ -147,43 +163,110 @@ const CreateEventPage = () => {
                             },
                         }}
                     >
-                        Upload File
-                        <input type="file" accept="image/*" hidden onChange={handleFileChange} />
+                        Upload poster image
+                        <input
+                            type="file"
+                            
+                            hidden
+                            onChange={(event: any) => setFormData({...formData, posterImg: event.target.files[0]})}
+                        />
                     </Button>
-                </Box>
-                
-                {/* File upload name */}
-                <Typography
-                    sx={{
-                        fontSize: 13,
-                        alignSelf: 'flex-start',
-                        fontWeight: 'bold',
-                        color: '#2DC275',
-                        height: 40,
-                        width: '100%'
-                    }}
-                >
-                    Selected file: {selectedFile && selectedFile.name}
-                </Typography>
+                    <Box
+                        component="img"
+                        src={formData.posterImg && URL.createObjectURL(formData.posterImg)}
+                        sx={{
+                            width: '100%'
+                        }}
+                    />
+                </Grid>
 
-                {/* Submit button */}
-                <Button
+                {/* Right field */}
+                <Grid item xs={6}
                     sx={{
-                        width: '100%',
-                        backgroundColor: '#2DC275',
-                        p: 1,
-                        color: 'white',
-                        border: '1px solid #2DC275',
-                        fontWeight: 'bold',
-                        '&:hover': {
-                            color: '#2DC275',
-                            backgroundColor: 'white',
-                        },
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '20px',
                     }}
                 >
-                    SUBMIT
-                </Button>
-            </Box>
+                    <EventInputField type="Event type" formData={formData} setFormData={setFormData}/>
+                    <EventInputField type="Price" formData={formData} setFormData={setFormData}/>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                            value={formData.eventdate}
+                            onChange={(date) => setFormData({...formData, eventdate: date})}
+                            label="Event date"
+                            format="DD/MM/YYYY"
+                            openTo="day"
+                            sx={{
+                                width: '100%',
+                                '& .MuiInputLabel-root.Mui-focused': {
+                                    color: '#2DC275',
+                                },
+                                '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
+                                    {
+                                        borderColor: '#2DC275',
+                                    },
+                            }}
+                        />
+                    </LocalizationProvider>
+                    <Button
+                        onClick={() => {
+                            console.log(formData)
+                            if (Object.values(formData).some(value => value === '' || value === null)) {
+                                setAlert('error')
+                                setTimeout(() => setAlert(''), 2000)
+                            } else {
+                                handleCreateEvent(formData)
+                                setAlert('success')
+                                setTimeout(() => setAlert(''), 2000)
+                                setFormData({
+                                    eventtitle: '',
+                                    eventtype: '',
+                                    location: '',
+                                    price: '',
+                                    eventdate: '',
+                                    posterImg: null
+                                })
+                            }
+                        }}
+                        sx={{
+                            width: '100%',
+                            backgroundColor: '#2DC275',
+                            p: 1,
+                            color: 'white',
+                            border: '1px solid #2DC275',
+                            fontWeight: 'bold',
+                            '&:hover': {
+                                color: '#2DC275',
+                                backgroundColor: 'white',
+                            },
+                        }}
+                    >
+                        SUBMIT
+                    </Button>
+                    {
+                        alert === 'success' &&
+                        <Alert severity="success"
+                            sx={{
+                                
+                            }}
+                        >
+                            Successfully created event
+                        </Alert>
+                    }
+                    {
+                        alert === 'error' &&
+                        <Alert severity="error"
+                            sx={{
+                                
+                            }}
+                        >
+                            Something went wrong
+                        </Alert>
+                    }
+                </Grid>
+            </Grid>
         </Box>
     );
 };
