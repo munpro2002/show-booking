@@ -41,7 +41,7 @@ const Back = () => {
                 cursor: 'pointer',
             }}
         >
-            <FontAwesomeIcon icon={faArrowLeft} color="#000000" />
+            <FontAwesomeIcon icon={faArrowLeft} color='black' />
             <Typography variant="subtitle1">Back</Typography>
         </Box>
     );
@@ -57,17 +57,6 @@ const EventDetailTitle = (props: EventDetailTitle) => {
                 alignItems: 'center',
             }}
         >
-            {/* <Typography
-                sx={{
-                    backgroundColor: '#2DC275',
-                    fontWeight: 'bold',
-                    borderRadius: 2,
-                    color: 'white',
-                    p: '10px 25px',
-                }}
-            >
-                BOOKING
-            </Typography> */}
             <Typography
                 variant="h4"
                 sx={{
@@ -87,12 +76,16 @@ const EventBooking = (props: any) => {
     const [totalCost, setTotalCost] = useState(0)
 
     useEffect(() => {
-        const ticketPrice = location.state.event.price
-        const totalSeats = 
-            props.seatSelectedArray.normal.length + 
-            props.seatSelectedArray.vip.length + 
-            props.seatSelectedArray.sweetbox.length
-        setTotalCost(ticketPrice * totalSeats)
+        const price = {
+            normal: location.state.event.price,
+            vip: location.state.event.price * 2,
+            sweetbox: location.state.event.price * 1.5
+        }
+        const totalCost = 
+            props.seatSelectedArray.normal.length * price.normal + 
+            props.seatSelectedArray.vip.length * price.vip + 
+            props.seatSelectedArray.sweetbox.length * price.sweetbox
+        setTotalCost(totalCost)
     }, [props.seatSelectedArray])
 
     return (
@@ -269,11 +262,19 @@ const EventBooking = (props: any) => {
 };
 
 const SeatMapAnnotation = () => {
+    const location = useLocation()    
+    const price = {
+        normal: location.state.event.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+        vip: (location.state.event.price * 2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+        sweetbox: (location.state.event.price * 1.5).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+    }
+
     return (
         <Box
             sx={{
                 display: 'flex',
-                gap: '40px',
+                flexDirection: 'column',
+                gap: '20px',
             }}
         >
             {/* Normal */}
@@ -292,7 +293,7 @@ const SeatMapAnnotation = () => {
                         backgroundColor: '#3d5afe',
                     }}
                 ></Box>
-                <Typography>Normal</Typography>
+                <Typography>Normal (<b>{price.normal} VND/seat</b>)</Typography>
             </Box>
 
             {/* VIP */}
@@ -311,7 +312,7 @@ const SeatMapAnnotation = () => {
                         backgroundColor: '#ffea00',
                     }}
                 ></Box>
-                <Typography>VIP</Typography>
+                <Typography>VIP (<b>{price.vip} VND/seat</b>)</Typography>
             </Box>
 
             {/* Sweetbox */}
@@ -330,7 +331,7 @@ const SeatMapAnnotation = () => {
                         backgroundColor: '#f50057',
                     }}
                 ></Box>
-                <Typography>Sweetbox</Typography>
+                <Typography>Sweetbox (<b>{price.sweetbox} VND/seat</b>)</Typography>
             </Box>
         </Box>
     );
@@ -345,41 +346,35 @@ const Seat = (props: Seat) => {
 
     const handleSetSeatSelectedArray = (seatPos: any, seatSelectedArray: any, setSeatSelectedArray: any) => {
         if (seatPos <= 20) {
-            if (seatSelectedArray.vip.includes(seatPos)) {
-                setSeatSelectedArray((prevState: any) => ({
-                    ...prevState,
-                    vip: prevState.vip.filter((num: any) => num !== seatPos)
-                }));
-            } else {
-                setSeatSelectedArray((prevState: any) => ({
-                    ...prevState,
-                    vip: [...prevState.vip, seatPos]
-                }));
-            }
+            seatSelectedArray.vip.includes(seatPos) ?
+            setSeatSelectedArray((prevState: any) => ({
+                ...prevState,
+                vip: prevState.vip.filter((num: any) => num !== seatPos)
+            })) :
+            setSeatSelectedArray((prevState: any) => ({
+                ...prevState,
+                vip: [...prevState.vip, seatPos]
+            }));
         } else if (seatPos >= 21 && seatPos <= 80) {
-            if (seatSelectedArray.normal.includes(seatPos)) {
-                setSeatSelectedArray((prevState: any) => ({
-                    ...prevState,
-                    normal: prevState.normal.filter((num: any) => num !== seatPos)
-                }));
-            } else {
-                setSeatSelectedArray((prevState: any) => ({
-                    ...prevState,
-                    normal: [...prevState.normal, seatPos]
-                }));
-            }
+            seatSelectedArray.normal.includes(seatPos) ?
+            setSeatSelectedArray((prevState: any) => ({
+                ...prevState,
+                normal: prevState.normal.filter((num: any) => num !== seatPos)
+            })) :
+            setSeatSelectedArray((prevState: any) => ({
+                ...prevState,
+                normal: [...prevState.normal, seatPos]
+            }));
         } else {
-            if (seatSelectedArray.sweetbox.includes(seatPos)) {
-                setSeatSelectedArray((prevState: any) => ({
-                    ...prevState,
-                    sweetbox: prevState.sweetbox.filter((num: any) => num !== seatPos)
-                }));
-            } else {
-                setSeatSelectedArray((prevState: any) => ({
-                    ...prevState,
-                    sweetbox: [...prevState.sweetbox, seatPos]
-                }));
-            }
+            seatSelectedArray.sweetbox.includes(seatPos) ?
+            setSeatSelectedArray((prevState: any) => ({
+                ...prevState,
+                sweetbox: prevState.sweetbox.filter((num: any) => num !== seatPos)
+            })) :
+            setSeatSelectedArray((prevState: any) => ({
+                ...prevState,
+                sweetbox: [...prevState.sweetbox, seatPos]
+            }));
         }
     }
 
@@ -433,7 +428,7 @@ const SeatMap = (props: any) => {
             </Typography>
 
             {/* Annotation */}
-            <SeatMapAnnotation />
+            <SeatMapAnnotation/>
 
             {/* Seatmap */}
             <Box

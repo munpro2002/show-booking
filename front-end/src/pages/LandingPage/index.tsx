@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    faCalendar,
+    faCalendarDays,
     faFilm,
     faLocationDot,
 } from '@fortawesome/free-solid-svg-icons';
@@ -124,7 +124,7 @@ const EventItem = (props: Type_EventItem) => {
                         }}
                     >
                         <FontAwesomeIcon
-                            icon={faCalendar}
+                            icon={faCalendarDays}
                             style={{ color: '#2DC275' }}
                         />
                         <Typography>{props.eventDate}</Typography>
