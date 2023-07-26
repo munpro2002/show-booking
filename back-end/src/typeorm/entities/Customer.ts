@@ -12,9 +12,6 @@ export class Customer {
   @Column()
   email: string;
 
-  @Column()
-  phone: string;
-
   @Column({ default: false })
   status: boolean;
 

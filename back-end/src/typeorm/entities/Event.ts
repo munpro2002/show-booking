@@ -35,11 +35,8 @@ export class Event {
   @Column()
   createTime: Date;
 
-  @Column({ default: true })
-  status: boolean;
-
-  @Column()
-  address: string;
+  @Column({ default: 'unpublish' })
+  status: string;
 
   @OneToOne(() => Seatmap)
   @JoinColumn()

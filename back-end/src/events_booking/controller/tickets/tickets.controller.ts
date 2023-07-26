@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Body } from '@nestjs/common';
 import { TicketsService } from 'src/events_booking/service/tickets/tickets.service';
 import { CreateTicketDto } from 'src/events_booking/dto/CreateTicket.dto';
 import { SeatsService } from 'src/events_booking/service/seats/seats.service';
 import { EventsService } from 'src/events_booking/service/events/events.service';
 import { CustomersService } from 'src/events_booking/service/customers/customers.service';
+import { EmailService } from 'src/email/email.service';
 
 @Controller('tickets')
 export class TicketsController {
@@ -12,6 +13,7 @@ export class TicketsController {
     private eventService: EventsService,
     private seatService: SeatsService,
     private customersService: CustomersService,
+    private emailService: EmailService,
   ) {}
 
   @Get()
@@ -25,7 +27,7 @@ export class TicketsController {
 
     const tickets = [];
 
-    const event = await this.eventService.findEvent(event_id);
+    const event = await this.eventService.findSpecificEvent(event_id);
     const customer = await this.customersService.creatCustomer(customer_info);
 
     for (let seat_id of seats_id) {
@@ -38,6 +40,10 @@ export class TicketsController {
       );
       tickets.push(ticket);
     }
+
+    //send confirmation ticket
+    const userPrivateId = customer.id;
+    await this.emailService.sendUserConfirmation(customer_info, userPrivateId);
 
     return tickets;
   }

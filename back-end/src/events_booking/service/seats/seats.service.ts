@@ -14,7 +14,7 @@ export class SeatsService {
   async findTicketSeat(seat_id: string) {
     const seat = await this.seatRepository.findOne({ where: { id: seat_id } });
 
-    seat.status = 'progress';
+    seat.status = 'unavailable';
 
     return this.seatRepository.save(seat);
   }
@@ -27,7 +27,7 @@ export class SeatsService {
     return await this.seatRepository.find({
       where: {
         seatmap: seatmap,
-        status: 'progress' || 'unavailable',
+        status: 'unavailable',
       },
     });
   }

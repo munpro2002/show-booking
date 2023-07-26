@@ -11,11 +11,15 @@ export class EventsService {
     @InjectRepository(Event) private eventRepository: Repository<Event>,
   ) {}
 
-  getAllEvents() {
-    return this.eventRepository.find({ relations: ['seatmap'] });
+  async getAllEvents() {
+    return await this.eventRepository.find({ relations: ['seatmap'] });
   }
 
-  findEvent(event_id: string) {
+  async getPublishEvents() {
+    return await this.eventRepository.find({ where: { status: 'published' } });
+  }
+
+  async findSpecificEvent(event_id: string) {
     return this.eventRepository.findOne({ where: { id: event_id } });
   }
 
@@ -27,6 +31,14 @@ export class EventsService {
     });
 
     return filterList;
+  }
+
+  async publishEvent(event_id: string) {
+    const event = await this.findSpecificEvent(event_id);
+
+    event.status = 'published';
+
+    this.eventRepository.save(event);
   }
 
   createEvent(createEventParams: CreateEventDto, seatmap: Seatmap) {

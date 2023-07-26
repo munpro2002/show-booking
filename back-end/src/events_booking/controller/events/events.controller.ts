@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Body,
   Query,
   Param,
@@ -12,7 +13,7 @@ import { EventsService } from 'src/events_booking/service/events/events.service'
 import { SeatsService } from 'src/events_booking/service/seats/seats.service';
 import { UploadedFile, UseInterceptors } from '@nestjs/common/decorators';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CloudinaryService } from 'src/events_booking/cloudinary/Cloudinary.service';
+import { CloudinaryService } from 'src/cloudinary/Cloudinary.service';
 
 @Controller('events')
 export class EventsController {
@@ -27,6 +28,11 @@ export class EventsController {
     return this.eventService.getAllEvents();
   }
 
+  @Get('published')
+  getPublishEvents() {
+    return this.eventService.getPublishEvents();
+  }
+
   @Get('seatmap/:id')
   async getEventSeatmap(@Param('id') id: string) {
     return await this.seatService.findSeatmap(id);
@@ -34,9 +40,12 @@ export class EventsController {
 
   @Get('search')
   getFilterEvents(@Query('query') query: string) {
-    Logger.log(this.eventService.findFilterEvents(query));
-
     return this.eventService.findFilterEvents(query);
+  }
+
+  @Put('update_status/:id')
+  updateEventStatus(@Param('id') id: string) {
+    this.eventService.publishEvent(id);
   }
 
   @Post('create_event')
