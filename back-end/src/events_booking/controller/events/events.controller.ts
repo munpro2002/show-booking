@@ -54,6 +54,8 @@ export class EventsController {
     @UploadedFile() file: Express.Multer.File,
     @Body() createEventDto: CreateEventDto,
   ) {
+    Logger.log(file)
+
     const result = await this.cloudinaryService.uploadFile(file);
 
     createEventDto.posterImg = result.url;
