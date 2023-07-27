@@ -4,16 +4,15 @@ import { Request, Response, NextFunction } from 'express';
 @Injectable()
 export class EmailValidationMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-    const emailRegex =
-      "/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:.[a-zA-Z0-9-]+)*$/";
+    let emailRegex = new RegExp('[a-z0-9]+@[a-z]+.[a-z]{2,3}');
 
-    if (req.body.email.match(emailRegex)) {
+    if (emailRegex.test(req.body.email)) {
       next();
+    } else {
+      res.writeHead(400, { 'content-type': 'application/json' });
+      res.write(JSON.stringify({ message: 'Bad request: Invalid Email' }));
+      res.end();
+      return;
     }
-
-    res.writeHead(400, { 'content-type': 'application/json' });
-    res.write(JSON.stringify({ message: 'Bad request: Invalid Email' }));
-    res.end();
-    return;
   }
 }
