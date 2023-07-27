@@ -456,7 +456,7 @@ const SeatMap = (props: any) => {
     );
 };
 
-const EventDetailPage = () => {
+const EventDetail = () => {
     const [seatSelectedArray, setSeatSelectedArray] = useState({
         normal: [],
         vip: [],
@@ -490,4 +490,4 @@ const EventDetailPage = () => {
     );
 };
 
-export default EventDetailPage;
+export default EventDetail;
