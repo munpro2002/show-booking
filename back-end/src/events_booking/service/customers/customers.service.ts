@@ -6,7 +6,6 @@ import { Customer } from 'src/typeorm/entities/Customer';
 interface CustomerInfo {
   fullName: string;
   email: string;
-  phone: string;
 }
 
 @Injectable()

@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Body,
-  Query,
-  Param,
-  Logger,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Query, Param } from '@nestjs/common';
 import { CreateEventDto } from 'src/events_booking/dto/CreateEvent.dto';
 import { EventsService } from 'src/events_booking/service/events/events.service';
 import { SeatsService } from 'src/events_booking/service/seats/seats.service';
@@ -54,8 +45,6 @@ export class EventsController {
     @UploadedFile() file: Express.Multer.File,
     @Body() createEventDto: CreateEventDto,
   ) {
-    Logger.log(file)
-
     const result = await this.cloudinaryService.uploadFile(file);
 
     createEventDto.posterImg = result.url;

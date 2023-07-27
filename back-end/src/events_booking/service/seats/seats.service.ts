@@ -49,7 +49,12 @@ export class SeatsService {
     await this.seatmapRepository.save(newSeatmap);
     await this.createSeat(newSeatmap);
 
-    const seats = await this.seatRepository.find();
+    const seats = await this.seatRepository.find({
+      where: {
+        seatmap: newSeatmap,
+      },
+    });
+
     newSeatmap.seat = seats;
 
     await this.seatmapRepository.save(newSeatmap);
