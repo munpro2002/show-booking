@@ -209,6 +209,7 @@ const CreateEvent = () => {
                     {/* Event date */}
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker
+                            disablePast
                             value={formData.eventdate}
                             onChange={(date) => setFormData({...formData, eventdate: date})}
                             label="Event date"

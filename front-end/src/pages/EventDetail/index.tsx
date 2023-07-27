@@ -23,12 +23,13 @@ type Seat = {
     setSeatSelectedArray: any;
 };
 
-const handleGetSeatId = () => {
-    
-}
-
-const handleBookingTicket = (formData: any) => {
-    console.log(formData)
+const handleBookingTicket = async (formData: any, seatMapId: string) => {
+    const getAllSeatId = (await axios.get(`http://localhost:3000/events/seatmap/${seatMapId}`)).data
+    const allSeatId = getAllSeatId.sort()
+    // .filter((seat: any) => {
+    //     return formData.seats.includes[seat.seatPos]
+    // })
+    console.log(allSeatId)
 }
 
 const Back = () => {
@@ -78,8 +79,9 @@ const EventDetailTitle = (props: EventDetailTitle) => {
 };
 
 const EventBooking = (props: any) => {
-    const [alert, setAlert] = useState('')
+    const navigation = useNavigate()
     const location = useLocation();
+    const [alert, setAlert] = useState('')
     const [focused, setFocused] = useState({
         'email': false,
         'name': false
@@ -274,8 +276,9 @@ const EventBooking = (props: any) => {
                                 setAlert('error')
                                 setTimeout(() => setAlert(''), 2000)
                             } else {
-                                handleBookingTicket(formData)
+                                handleBookingTicket(formData, location.state.event.seatMapId)
                                 setAlert('success')
+                                setTimeout(() => navigation('/my_ticket'), 1500)
                             }
                         }}
                         sx={{
@@ -519,8 +522,8 @@ const SeatMapAnnotation = () => {
 const Seat = (props: Seat) => {
     const [selected, setSelected] = useState(false);
     let color;
-    if (props.seatPos <= 20) color = '#ffea00';
-    else if (props.seatPos >= 21 && props.seatPos <= 80) color = '#3d5afe';
+    if (props.seatPos <= 20) color = '#3d5afe';
+    else if (props.seatPos >= 21 && props.seatPos <= 60) color = '#ffea00';
     else color = '#f50057';
 
     const handleSetSeatSelectedArray = (

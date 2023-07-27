@@ -27,7 +27,6 @@ export class SeatsService {
     return await this.seatRepository.find({
       where: {
         seatmap: seatmap,
-        status: 'unavailable',
       },
     });
   }
