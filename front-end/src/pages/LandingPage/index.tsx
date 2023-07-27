@@ -6,12 +6,14 @@ import {
     Grid,
     Typography,
     CircularProgress,
+    InputAdornment
 } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faCalendarDays,
     faFilm,
     faLocationDot,
+    faMagnifyingGlass
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 
@@ -42,7 +44,7 @@ const handleSearchPublishedEvent = async (keyword: string) => {
         },
     });
     return response.data.filter((event: Type_EventItem) => {
-        return event.status === 'publish'
+        return event.status === 'published'
     });
 };
 
@@ -177,6 +179,7 @@ const EventItem = (props: Type_EventItem) => {
 const LandingPage = () => {
     const [loading, setIsLoading] = useState(false);
     const [eventList, setEventList] = useState<Array<Type_EventItem>>([]);
+    const [focused, setFocuses] = useState(false);
     useEffect(() => {
         setIsLoading(true)
         const FetchEvents = async () => {
@@ -201,6 +204,8 @@ const LandingPage = () => {
             {/* Search event */}
             <TextField
                 placeholder="Search events..."
+                onFocus={() => setFocuses(true)}
+                onBlur={() => setFocuses(false)}
                 onChange={async (event) => {
                     setIsLoading(true);
                     let eventSearchResult: [Type_EventItem];
@@ -216,6 +221,22 @@ const LandingPage = () => {
                 }}
                 sx={{
                     width: '250px',
+                    '& .MuiInputLabel-root.Mui-focused': {
+                        color: '#2DC275',
+                    },
+                    '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#2DC275',
+                    },
+                }}
+                InputProps={{
+                    startAdornment: (
+                        <InputAdornment position="start">
+                            <FontAwesomeIcon
+                                icon={faMagnifyingGlass}
+                                color={focused ? '#2DC275' : ''}
+                            />
+                        </InputAdornment>
+                    ),
                 }}
             />
 

@@ -5,7 +5,6 @@ import {
     TextField,
     InputAdornment,
     Button,
-    InputLabel,
     Alert,
     Grid,
     CircularProgress
@@ -51,7 +50,7 @@ const handleCreateEvent = async (formData: any, setLoading: any, setAlert: any, 
 };
 
 const EventInputField = (props: any) => {
-    const [focused, setFocuses] = useState(false);
+    const [focused, setFocused] = useState(false);
     const IconMapping: { [key: string]: React.ReactElement } = {
         eventtitle: (
             <FontAwesomeIcon
@@ -80,20 +79,20 @@ const EventInputField = (props: any) => {
     return (
         <TextField
             fullWidth
+            className='text-field'
             value={props.formData[lowercaseType]}
             onChange={(event) => props.setFormData({...props.formData, [lowercaseType]: event.target.value})}
             type={props.type === 'Price' ? 'number' : 'text'}
-            onFocus={() => setFocuses(true)}
-            onBlur={() => setFocuses(false)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             label={props.type + (props.type === 'Price' ? ' (VND)' : '')}
             sx={{
                 '& .MuiInputLabel-root.Mui-focused': {
                     color: '#2DC275',
                 },
-                '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
-                    {
-                        borderColor: '#2DC275',
-                    },
+                '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#2DC275',
+                },
             }}
             InputProps={{
                 startAdornment: (
@@ -234,7 +233,6 @@ const CreateEvent = () => {
                     {/* Create event button */}
                     <Button
                         onClick={() => {
-                            console.log(formData)
                             if (Object.values(formData).some(value => value === '' || value === null)) {
                                 setAlert('error')
                                 setTimeout(() => setAlert(''), 2000)
@@ -286,23 +284,11 @@ const CreateEvent = () => {
                     {/* Alert result */}
                     {
                         alert === 'success' &&
-                        <Alert severity="success"
-                            sx={{
-                                
-                            }}
-                        >
-                            Successfully created event
-                        </Alert>
+                        <Alert severity="success">Successfully created event</Alert>
                     }
                     {
                         alert === 'error' &&
-                        <Alert severity="error"
-                            sx={{
-                                
-                            }}
-                        >
-                            Something went wrong
-                        </Alert>
+                        <Alert severity="error">Something went wrong</Alert>
                     }
                 </Grid>
             </Grid>

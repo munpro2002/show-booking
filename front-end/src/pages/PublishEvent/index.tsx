@@ -7,6 +7,7 @@ import {
     CircularProgress,
     Alert,
     Button,
+    InputAdornment
 } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -14,9 +15,9 @@ import {
     faFilm,
     faLocationDot,
     faGlobe,
+    faMagnifyingGlass
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 
 type Type_EventItem = {
     id: string;
@@ -268,6 +269,7 @@ const EventItem = (props: Type_EventItem) => {
 };
 
 const PublishEvent = () => {
+    const [focused, setFocuses] = useState(false);
     const [loading, setIsLoading] = useState(false);
     const [eventList, setEventList] = useState<Array<Type_EventItem>>([]);
     useEffect(() => {
@@ -294,6 +296,8 @@ const PublishEvent = () => {
             {/* Search event */}
             <TextField
                 placeholder="Search events..."
+                onFocus={() => setFocuses(true)}
+                onBlur={() => setFocuses(false)}
                 onChange={async (event) => {
                     setIsLoading(true);
                     let eventSearchResult: [Type_EventItem];
@@ -309,6 +313,22 @@ const PublishEvent = () => {
                 }}
                 sx={{
                     width: '250px',
+                    '& .MuiInputLabel-root.Mui-focused': {
+                        color: '#2DC275',
+                    },
+                    '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#2DC275',
+                    },
+                }}
+                InputProps={{
+                    startAdornment: (
+                        <InputAdornment position="start">
+                            <FontAwesomeIcon
+                                icon={faMagnifyingGlass}
+                                color={focused ? '#2DC275' : ''}
+                            />
+                        </InputAdornment>
+                    ),
                 }}
             />
 

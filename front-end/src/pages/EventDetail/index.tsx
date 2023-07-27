@@ -1,19 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
 import { useNavigate } from 'react-router';
-import {
-    Box, 
-    Typography, 
-    Button, 
-    Grid
-} from '@mui/material';
+import { Box, Typography, Button, Grid, TextField, InputAdornment, Alert } from '@mui/material';
 import {
     faArrowLeft,
     faCalendar,
     faFilm,
     faLocationDot,
+    faEnvelope,
+    faUser
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import axios from 'axios'
 
 type EventDetailTitle = {
     title: string;
@@ -24,6 +22,14 @@ type Seat = {
     seatSelectedArray: any;
     setSeatSelectedArray: any;
 };
+
+const handleGetSeatId = () => {
+    
+}
+
+const handleBookingTicket = (formData: any) => {
+    console.log(formData)
+}
 
 const Back = () => {
     const navigation = useNavigate();
@@ -41,7 +47,7 @@ const Back = () => {
                 cursor: 'pointer',
             }}
         >
-            <FontAwesomeIcon icon={faArrowLeft} color='black' />
+            <FontAwesomeIcon icon={faArrowLeft} color="black" />
             <Typography variant="subtitle1">Back</Typography>
         </Box>
     );
@@ -72,21 +78,34 @@ const EventDetailTitle = (props: EventDetailTitle) => {
 };
 
 const EventBooking = (props: any) => {
-    const location = useLocation()
-    const [totalCost, setTotalCost] = useState(0)
+    const [alert, setAlert] = useState('')
+    const location = useLocation();
+    const [focused, setFocused] = useState({
+        'email': false,
+        'name': false
+    })
+    const [totalCost, setTotalCost] = useState(0);
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        event_id: location.state.event.id,
+        seats: null as any
+    })
 
     useEffect(() => {
+        const seatSelectedArray = [...props.seatSelectedArray.normal, ...props.seatSelectedArray.vip, ...props.seatSelectedArray.sweetbox]
+        setFormData({...formData, seats: seatSelectedArray})
         const price = {
             normal: location.state.event.price,
             vip: location.state.event.price * 2,
-            sweetbox: location.state.event.price * 1.5
-        }
-        const totalCost = 
-            props.seatSelectedArray.normal.length * price.normal + 
-            props.seatSelectedArray.vip.length * price.vip + 
-            props.seatSelectedArray.sweetbox.length * price.sweetbox
-        setTotalCost(totalCost)
-    }, [props.seatSelectedArray])
+            sweetbox: location.state.event.price * 1.5,
+        };
+        const totalCost =
+            props.seatSelectedArray.normal.length * price.normal +
+            props.seatSelectedArray.vip.length * price.vip +
+            props.seatSelectedArray.sweetbox.length * price.sweetbox;
+        setTotalCost(totalCost);
+    }, [props.seatSelectedArray]);
 
     return (
         <Box
@@ -109,56 +128,201 @@ const EventBooking = (props: any) => {
             </Typography>
 
             {/* Content */}
-            <Grid container sx={{ gap: '20px' }} >
+            <Grid container sx={{ gap: '20px' }}>
                 {/* Check seat and price */}
                 <Grid item xs={5}
                     sx={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '10px',
+                        gap: '20px',
                         border: '3px solid #2DC275',
                         borderRadius: 2,
                         p: 2,
-                        height: 'fit-content'
+                        height: 'fit-content',
+                        position: 'relative',
                     }}
                 >
-                    <Typography sx={{ fontWeight: 'bold' }} >Seat selected:</Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }} >
-                        <Typography>&#x25CF; Normal:</Typography>
-                        <Typography><b>{props.seatSelectedArray.normal.length} seat(s)</b></Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }} >
-                        <Typography>&#x25CF; VIP:</Typography>
-                        <Typography><b>{props.seatSelectedArray.vip.length} seat(s)</b></Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }} >
-                        <Typography>&#x25CF; Sweetbox:</Typography>
-                        <Typography><b>{props.seatSelectedArray.sweetbox.length} seat(s)</b></Typography>
-                    </Box>
-                    <Box sx={{ width: '100%', height: '2px', backgroundColor: 'black', m: '10px 0px' }}></Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }} >
-                        <Typography><b>Total cost:</b></Typography>
-                        <Typography><b>{totalCost.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} VND</b></Typography>
-                    </Box>
-                    <Button
+                    <Typography sx={{ fontWeight: 'bold' }}>
+                        Seat selected:
+                    </Typography>
+                    <Box
                         sx={{
-                            mt: 2,
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                        }}
+                    >
+                        <Typography>&#x25CF; Normal:</Typography>
+                        <Typography>
+                            <b>
+                                {props.seatSelectedArray.normal.length} seat(s)
+                            </b>
+                        </Typography>
+                    </Box>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                        }}
+                    >
+                        <Typography>&#x25CF; VIP:</Typography>
+                        <Typography>
+                            <b>{props.seatSelectedArray.vip.length} seat(s)</b>
+                        </Typography>
+                    </Box>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                        }}
+                    >
+                        <Typography>&#x25CF; Sweetbox:</Typography>
+                        <Typography>
+                            <b>
+                                {props.seatSelectedArray.sweetbox.length}{' '}
+                                seat(s)
+                            </b>
+                        </Typography>
+                    </Box>
+                    <Box
+                        sx={{
+                            width: '100%',
+                            height: '2px',
+                            backgroundColor: 'black',
+                            m: '10px 0px',
+                        }}
+                    ></Box>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                        }}
+                    >
+                        <Typography>
+                            <b>Total cost:</b>
+                        </Typography>
+                        <Typography>
+                            <b>
+                                {totalCost
+                                    .toString()
+                                    .replace(/\B(?=(\d{3})+(?!\d))/g, '.')}{' '}
+                                VND
+                            </b>
+                        </Typography>
+                    </Box>
+
+                    {/* Input email and Name */}
+                    <TextField
+                        fullWidth
+                        type='email'
+                        placeholder='example123@email.com'
+                        value={formData.email}
+                        onChange={(event) => setFormData({...formData, email: event.target.value})}
+                        onFocus={() => setFocused({...focused, email: true})}
+                        onBlur={() => setFocused({...focused, email: false})}
+                        label='Email address'
+                        sx={{
+                            '& .MuiInputLabel-root.Mui-focused': {
+                                color: '#2DC275',
+                            },
+                            '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
+                                {
+                                    borderColor: '#2DC275',
+                                },
+                        }}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <FontAwesomeIcon
+                                        icon={faEnvelope}
+                                        color={focused.email ? '#2DC275' : ''}
+                                    />
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+                    <TextField
+                        fullWidth
+                        value={formData.name}
+                        placeholder='Your full name'
+                        onChange={(event) => setFormData({...formData, name: event.target.value})}
+                        onFocus={() => setFocused({...focused, name: true})}
+                        onBlur={() => setFocused({...focused, name: false})}
+                        label='Name'
+                        sx={{
+                            '& .MuiInputLabel-root.Mui-focused': {
+                                color: '#2DC275',
+                            },
+                            '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
+                                {
+                                    borderColor: '#2DC275',
+                                },
+                        }}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <FontAwesomeIcon
+                                        icon={faUser}
+                                        color={focused.name ? '#2DC275' : ''}
+                                    />
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+                    <Button
+                        onClick={() => {
+                            if (Object.values(formData).some(value => value === '' || value.length === 0)) {
+                                setAlert('error')
+                                setTimeout(() => setAlert(''), 2000)
+                            } else {
+                                handleBookingTicket(formData)
+                                setAlert('success')
+                            }
+                        }}
+                        sx={{
                             backgroundColor: '#2DC275',
                             p: 2,
                             color: 'white',
                             fontWeight: 'bold',
                             border: '1px solid #2DC275',
                             '&:hover': {
-                                color: '#2DC275'
-                            }
+                                color: '#2DC275',
+                            },
                         }}
                     >
                         Submit booking
                     </Button>
+
+                    {
+                        alert === 'success' &&
+                        <Alert severity="success"
+                            sx={{
+                                position: 'absolute',
+                                top: '103%',
+                                width: '78%',
+                                alignItems: 'center'
+                            }}
+                        >
+                            Successfully booked. <br/> Please check your email
+                        </Alert>
+                    }
+                    {
+                        alert === 'error' &&
+                        <Alert severity="error"
+                            sx={{
+                                position: 'absolute',
+                                top: '103%',
+                                width: '78%'
+                            }}
+                        >
+                            Something went wrong
+                        </Alert>
+                    }
                 </Grid>
 
                 {/* Event information */}
-                <Grid item xs={6}
+                <Grid
+                    item
+                    xs={6}
                     sx={{
                         display: 'flex',
                         flexDirection: 'column',
@@ -166,7 +330,7 @@ const EventBooking = (props: any) => {
                         border: '3px solid #2DC275',
                         borderRadius: 2,
                         p: 2,
-                        height: 'fit-content'
+                        height: 'fit-content',
                     }}
                 >
                     {/* Price and date */}
@@ -186,7 +350,10 @@ const EventBooking = (props: any) => {
                                     fontWeight: 'bold',
                                 }}
                             >
-                                {location.state.event.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} VND
+                                {location.state.event.price
+                                    .toString()
+                                    .replace(/\B(?=(\d{3})+(?!\d))/g, '.')}{' '}
+                                VND
                             </Typography>
                         </Box>
                         {/* eventDate */}
@@ -262,12 +429,18 @@ const EventBooking = (props: any) => {
 };
 
 const SeatMapAnnotation = () => {
-    const location = useLocation()    
+    const location = useLocation();
     const price = {
-        normal: location.state.event.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-        vip: (location.state.event.price * 2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-        sweetbox: (location.state.event.price * 1.5).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-    }
+        normal: location.state.event.price
+            .toString()
+            .replace(/\B(?=(\d{3})+(?!\d))/g, '.'),
+        vip: (location.state.event.price * 2)
+            .toString()
+            .replace(/\B(?=(\d{3})+(?!\d))/g, '.'),
+        sweetbox: (location.state.event.price * 1.5)
+            .toString()
+            .replace(/\B(?=(\d{3})+(?!\d))/g, '.'),
+    };
 
     return (
         <Box
@@ -293,7 +466,9 @@ const SeatMapAnnotation = () => {
                         backgroundColor: '#3d5afe',
                     }}
                 ></Box>
-                <Typography>Normal (<b>{price.normal} VND/seat</b>)</Typography>
+                <Typography>
+                    Normal (<b>{price.normal} VND/seat</b>)
+                </Typography>
             </Box>
 
             {/* VIP */}
@@ -312,7 +487,9 @@ const SeatMapAnnotation = () => {
                         backgroundColor: '#ffea00',
                     }}
                 ></Box>
-                <Typography>VIP (<b>{price.vip} VND/seat</b>)</Typography>
+                <Typography>
+                    VIP (<b>{price.vip} VND/seat</b>)
+                </Typography>
             </Box>
 
             {/* Sweetbox */}
@@ -331,7 +508,9 @@ const SeatMapAnnotation = () => {
                         backgroundColor: '#f50057',
                     }}
                 ></Box>
-                <Typography>Sweetbox (<b>{price.sweetbox} VND/seat</b>)</Typography>
+                <Typography>
+                    Sweetbox (<b>{price.sweetbox} VND/seat</b>)
+                </Typography>
             </Box>
         </Box>
     );
@@ -344,46 +523,57 @@ const Seat = (props: Seat) => {
     else if (props.seatPos >= 21 && props.seatPos <= 80) color = '#3d5afe';
     else color = '#f50057';
 
-    const handleSetSeatSelectedArray = (seatPos: any, seatSelectedArray: any, setSeatSelectedArray: any) => {
+    const handleSetSeatSelectedArray = (
+        seatPos: any,
+        seatSelectedArray: any,
+        setSeatSelectedArray: any
+    ) => {
         if (seatPos <= 20) {
-            seatSelectedArray.vip.includes(seatPos) ?
-            setSeatSelectedArray((prevState: any) => ({
-                ...prevState,
-                vip: prevState.vip.filter((num: any) => num !== seatPos)
-            })) :
-            setSeatSelectedArray((prevState: any) => ({
-                ...prevState,
-                vip: [...prevState.vip, seatPos]
-            }));
+            seatSelectedArray.vip.includes(seatPos)
+                ? setSeatSelectedArray((prevState: any) => ({
+                      ...prevState,
+                      vip: prevState.vip.filter((num: any) => num !== seatPos),
+                  }))
+                : setSeatSelectedArray((prevState: any) => ({
+                      ...prevState,
+                      vip: [...prevState.vip, seatPos],
+                  }));
         } else if (seatPos >= 21 && seatPos <= 80) {
-            seatSelectedArray.normal.includes(seatPos) ?
-            setSeatSelectedArray((prevState: any) => ({
-                ...prevState,
-                normal: prevState.normal.filter((num: any) => num !== seatPos)
-            })) :
-            setSeatSelectedArray((prevState: any) => ({
-                ...prevState,
-                normal: [...prevState.normal, seatPos]
-            }));
+            seatSelectedArray.normal.includes(seatPos)
+                ? setSeatSelectedArray((prevState: any) => ({
+                      ...prevState,
+                      normal: prevState.normal.filter(
+                          (num: any) => num !== seatPos
+                      ),
+                  }))
+                : setSeatSelectedArray((prevState: any) => ({
+                      ...prevState,
+                      normal: [...prevState.normal, seatPos],
+                  }));
         } else {
-            seatSelectedArray.sweetbox.includes(seatPos) ?
-            setSeatSelectedArray((prevState: any) => ({
-                ...prevState,
-                sweetbox: prevState.sweetbox.filter((num: any) => num !== seatPos)
-            })) :
-            setSeatSelectedArray((prevState: any) => ({
-                ...prevState,
-                sweetbox: [...prevState.sweetbox, seatPos]
-            }));
+            seatSelectedArray.sweetbox.includes(seatPos)
+                ? setSeatSelectedArray((prevState: any) => ({
+                      ...prevState,
+                      sweetbox: prevState.sweetbox.filter(
+                          (num: any) => num !== seatPos
+                      ),
+                  }))
+                : setSeatSelectedArray((prevState: any) => ({
+                      ...prevState,
+                      sweetbox: [...prevState.sweetbox, seatPos],
+                  }));
         }
-    }
+    };
 
     return (
         <Box
             onClick={() => {
                 setSelected(!selected);
-                handleSetSeatSelectedArray(props.seatPos, props.seatSelectedArray, props.setSeatSelectedArray)
-                console.log(props.seatSelectedArray)
+                handleSetSeatSelectedArray(
+                    props.seatPos,
+                    props.seatSelectedArray,
+                    props.setSeatSelectedArray
+                );
             }}
             sx={{
                 cursor: 'pointer',
@@ -428,7 +618,7 @@ const SeatMap = (props: any) => {
             </Typography>
 
             {/* Annotation */}
-            <SeatMapAnnotation/>
+            <SeatMapAnnotation />
 
             {/* Seatmap */}
             <Box
@@ -443,13 +633,13 @@ const SeatMap = (props: any) => {
             >
                 {arraySeat.map((seat, index) => {
                     return (
-                        <Seat 
+                        <Seat
                             key={index}
                             seatPos={seat}
                             seatSelectedArray={props.seatSelectedArray}
                             setSeatSelectedArray={props.setSeatSelectedArray}
                         />
-                    )
+                    );
                 })}
             </Box>
         </Box>
@@ -460,8 +650,8 @@ const EventDetail = () => {
     const [seatSelectedArray, setSeatSelectedArray] = useState({
         normal: [],
         vip: [],
-        sweetbox: []
-    })
+        sweetbox: [],
+    });
 
     const location = useLocation();
     return (
@@ -479,11 +669,14 @@ const EventDetail = () => {
             <Back />
             <EventDetailTitle title={location.state.event.title} />
             <Grid container spacing={2}>
-                <Grid item xs={6}>
-                    <SeatMap seatSelectedArray={seatSelectedArray} setSeatSelectedArray={setSeatSelectedArray}/>
+                <Grid item lg={6} sm={12}>
+                    <SeatMap
+                        seatSelectedArray={seatSelectedArray}
+                        setSeatSelectedArray={setSeatSelectedArray}
+                    />
                 </Grid>
-                <Grid item xs={6}>
-                    <EventBooking seatSelectedArray={seatSelectedArray}/>
+                <Grid item lg={6} sm={12}>
+                    <EventBooking seatSelectedArray={seatSelectedArray} />
                 </Grid>
             </Grid>
         </Box>
