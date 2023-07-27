@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { TicketsService } from 'src/events_booking/service/tickets/tickets.service';
 import { CreateTicketDto } from 'src/events_booking/dto/CreateTicket.dto';
 import { SeatsService } from 'src/events_booking/service/seats/seats.service';
@@ -19,6 +19,14 @@ export class TicketsController {
   @Get()
   getTickets() {
     return this.ticketService.getAllTickets();
+  }
+
+  @Get('user_tickets/:id')
+  async findCustomerTickets(@Param('id') id: string) {
+    const customer = await this.customersService.findCustomer(id);
+    const tickets = await this.ticketService.getUserTicketsInfo(customer);
+
+    return tickets;
   }
 
   @Post('create_ticket')
