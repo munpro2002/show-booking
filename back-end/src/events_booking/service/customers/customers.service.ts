@@ -22,4 +22,12 @@ export class CustomersService {
 
     return this.customerRepository.save(newCustomer);
   }
+
+  async findCustomer(userid: string) {
+    return await this.customerRepository.findOne({
+      where: {
+        id: userid,
+      },
+    });
+  }
 }
