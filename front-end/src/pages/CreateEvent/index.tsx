@@ -5,9 +5,9 @@ import {
     TextField,
     InputAdornment,
     Button,
-    InputLabel,
     Alert,
     Grid,
+    CircularProgress
 } from '@mui/material';
 import {
     faFilm,
@@ -21,10 +21,10 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import axios from 'axios';
 
-const handleCreateEvent = async (formData: any) => {
+const handleCreateEvent = async (formData: any, setLoading: any, setAlert: any, setFormData: any) => {
     try {
-        console.log(formData)
-        axios.post('http://localhost:3000/events/create_event', {
+        setLoading(true)
+        await axios.post('http://localhost:3000/events/create_event', {
             title: formData.eventtitle,
             eventType: formData.eventtype,
             location: formData.location,
@@ -32,19 +32,25 @@ const handleCreateEvent = async (formData: any) => {
             eventDate: formData.eventdate,
             posterImg: formData.posterImg,
             address: ''
-        }, {
-            headers:{
-                'Content-Type':'multipart/form-data'
-            }
-        }
-        )
+        }, {headers:{'Content-Type':'multipart/form-data'}})
+        setLoading(false)
+        setAlert('success')
+        setTimeout(() => setAlert(''), 2000)
+        setFormData({
+            eventtitle: '',
+            eventtype: '',
+            location: '',
+            price: '',
+            eventdate: null,
+            posterImg: null
+        })
     } catch (err) {
         console.log(err)
     }
 };
 
 const EventInputField = (props: any) => {
-    const [focused, setFocuses] = useState(false);
+    const [focused, setFocused] = useState(false);
     const IconMapping: { [key: string]: React.ReactElement } = {
         eventtitle: (
             <FontAwesomeIcon
@@ -73,20 +79,20 @@ const EventInputField = (props: any) => {
     return (
         <TextField
             fullWidth
+            className='text-field'
             value={props.formData[lowercaseType]}
             onChange={(event) => props.setFormData({...props.formData, [lowercaseType]: event.target.value})}
             type={props.type === 'Price' ? 'number' : 'text'}
-            onFocus={() => setFocuses(true)}
-            onBlur={() => setFocuses(false)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             label={props.type + (props.type === 'Price' ? ' (VND)' : '')}
             sx={{
                 '& .MuiInputLabel-root.Mui-focused': {
                     color: '#2DC275',
                 },
-                '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
-                    {
-                        borderColor: '#2DC275',
-                    },
+                '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#2DC275',
+                },
             }}
             InputProps={{
                 startAdornment: (
@@ -99,14 +105,15 @@ const EventInputField = (props: any) => {
     );
 };
 
-const CreateEventPage = () => {
+const CreateEvent = () => {
+    const [loading, setLoading] = useState(false)
     const [alert, setAlert] = useState('')
     const [formData, setFormData] = useState({
         eventtitle: '',
         eventtype: '',
         location: '',
         price: '',
-        eventdate: '' as string || null,
+        eventdate: null,
         posterImg: null as any
     });
 
@@ -151,8 +158,11 @@ const CreateEventPage = () => {
                         gap: '20px',
                     }}
                 >
+                    {/* Event type and location */}
                     <EventInputField type="Event title" formData={formData} setFormData={setFormData}/>
                     <EventInputField type="Location" formData={formData} setFormData={setFormData}/>
+
+                    {/* Upload poster image */}
                     <Button component="label"
                         sx={{
                             fontSize: 10,
@@ -176,6 +186,8 @@ const CreateEventPage = () => {
                             onChange={(event: any) => setFormData({...formData, posterImg: event.target.files[0]})}
                         />
                     </Button>
+
+                    {/* Poster image box */}
                     <Box
                         component="img"
                         src={formData.posterImg && URL.createObjectURL(formData.posterImg)}
@@ -194,45 +206,38 @@ const CreateEventPage = () => {
                         gap: '20px',
                     }}
                 >
-                    <EventInputField type="Event type" formData={formData} setFormData={setFormData}/>
-                    <EventInputField type="Price" formData={formData} setFormData={setFormData}/>
+                    {/* Event date */}
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker
                             value={formData.eventdate}
                             onChange={(date) => setFormData({...formData, eventdate: date})}
                             label="Event date"
                             format="DD/MM/YYYY"
-                            openTo="day"
+                            openTo='day'
                             sx={{
                                 width: '100%',
                                 '& .MuiInputLabel-root.Mui-focused': {
                                     color: '#2DC275',
                                 },
-                                '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
-                                    {
-                                        borderColor: '#2DC275',
-                                    },
+                                '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: '#2DC275',
+                                },
                             }}
                         />
                     </LocalizationProvider>
+                    
+                    {/* Event type and price */}
+                    <EventInputField type="Event type" formData={formData} setFormData={setFormData}/>
+                    <EventInputField type="Price" formData={formData} setFormData={setFormData}/>
+
+                    {/* Create event button */}
                     <Button
                         onClick={() => {
-                            console.log(formData)
                             if (Object.values(formData).some(value => value === '' || value === null)) {
                                 setAlert('error')
                                 setTimeout(() => setAlert(''), 2000)
                             } else {
-                                handleCreateEvent(formData)
-                                setAlert('success')
-                                setTimeout(() => setAlert(''), 2000)
-                                setFormData({
-                                    eventtitle: '',
-                                    eventtype: '',
-                                    location: '',
-                                    price: '',
-                                    eventdate: '',
-                                    posterImg: null
-                                })
+                                handleCreateEvent(formData, setLoading, setAlert, setFormData)
                             }
                         }}
                         sx={{
@@ -250,25 +255,40 @@ const CreateEventPage = () => {
                     >
                         SUBMIT
                     </Button>
+
+                    {/* Loading when creating event */}
                     {
-                        alert === 'success' &&
-                        <Alert severity="success"
+                        loading &&
+                        <Box
                             sx={{
-                                
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '20px'
                             }}
                         >
-                            Successfully created event
-                        </Alert>
+                            <CircularProgress
+                                sx={{
+                                    color: '#2DC275',
+                                }}
+                            />
+                            <Typography
+                                sx={{
+                                    color: '#2DC275'
+                                }}
+                            >
+                                Creating event...
+                            </Typography>
+                        </Box>
+                    }
+
+                    {/* Alert result */}
+                    {
+                        alert === 'success' &&
+                        <Alert severity="success">Successfully created event</Alert>
                     }
                     {
                         alert === 'error' &&
-                        <Alert severity="error"
-                            sx={{
-                                
-                            }}
-                        >
-                            Something went wrong
-                        </Alert>
+                        <Alert severity="error">Something went wrong</Alert>
                     }
                 </Grid>
             </Grid>
@@ -276,4 +296,4 @@ const CreateEventPage = () => {
     );
 };
 
-export default CreateEventPage;
+export default CreateEvent;

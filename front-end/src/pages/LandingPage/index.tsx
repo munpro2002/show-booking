@@ -6,12 +6,14 @@ import {
     Grid,
     Typography,
     CircularProgress,
+    InputAdornment
 } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faCalendarDays,
     faFilm,
     faLocationDot,
+    faMagnifyingGlass
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 
@@ -23,28 +25,27 @@ type Type_EventItem = {
     location: string;
     eventType: string;
     price: string;
+    status: string;
     seatmap: {
         id: string;
         status: boolean;
     }
 };
 
-// type handleGetAllEvents = () => [Type_EventItem];
-
-// type handleSearchEvent = (keyword: string) => [Type_EventItem];
-
-const handleGetAllEvents = async () => {
-    const response = await axios.get('http://localhost:3000/events');
+const handleGetPublishedEvents = async () => {
+    const response = await axios.get('http://localhost:3000/events/published');
     return response.data;
 };
 
-const handleSearchEvent = async (keyword: string) => {
+const handleSearchPublishedEvent = async (keyword: string) => {
     const response = await axios.get('http://localhost:3000/events/search', {
         params: {
             query: keyword,
         },
     });
-    return response.data;
+    return response.data.filter((event: Type_EventItem) => {
+        return event.status === 'published'
+    });
 };
 
 const EventItem = (props: Type_EventItem) => {
@@ -54,8 +55,10 @@ const EventItem = (props: Type_EventItem) => {
         <Grid item xl={3} md={4} sm={6} xs={12}
             onClick={() => navigate(`/event_detail/${props.id}`, { state: { event: props } })}
             sx={{
+                width: '100%',
                 display: 'flex',
                 flexDirection: 'column',
+                alignItems: 'center',
                 cursor: 'pointer',
                 transition: 'transform 0.3s',
                 maxHeight: '500px',
@@ -74,12 +77,15 @@ const EventItem = (props: Type_EventItem) => {
                 src={props.posterImg}
                 sx={{
                     marginBottom: '10px',
+                    height: '150px',
+                    width: 'fit-content'
                 }}
             />
 
             {/* Main content */}
             <Box
                 sx={{
+                    width: '100%',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '10px',
@@ -173,12 +179,15 @@ const EventItem = (props: Type_EventItem) => {
 const LandingPage = () => {
     const [loading, setIsLoading] = useState(false);
     const [eventList, setEventList] = useState<Array<Type_EventItem>>([]);
+    const [focused, setFocuses] = useState(false);
     useEffect(() => {
+        setIsLoading(true)
         const FetchEvents = async () => {
-            const eventGetAllResult = await handleGetAllEvents();
+            const eventGetAllResult = await handleGetPublishedEvents();
             setEventList(eventGetAllResult);
         };
         FetchEvents();
+        setTimeout(() => setIsLoading(false), 1000)
     }, []);
 
     return (
@@ -195,13 +204,15 @@ const LandingPage = () => {
             {/* Search event */}
             <TextField
                 placeholder="Search events..."
+                onFocus={() => setFocuses(true)}
+                onBlur={() => setFocuses(false)}
                 onChange={async (event) => {
                     setIsLoading(true);
                     let eventSearchResult: [Type_EventItem];
                     if (event.currentTarget.value === '') {
-                        eventSearchResult = await handleGetAllEvents();
+                        eventSearchResult = await handleGetPublishedEvents();
                     } else {
-                        eventSearchResult = await handleSearchEvent(
+                        eventSearchResult = await handleSearchPublishedEvent(
                             event.currentTarget.value
                         );
                     }
@@ -210,6 +221,22 @@ const LandingPage = () => {
                 }}
                 sx={{
                     width: '250px',
+                    '& .MuiInputLabel-root.Mui-focused': {
+                        color: '#2DC275',
+                    },
+                    '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#2DC275',
+                    },
+                }}
+                InputProps={{
+                    startAdornment: (
+                        <InputAdornment position="start">
+                            <FontAwesomeIcon
+                                icon={faMagnifyingGlass}
+                                color={focused ? '#2DC275' : ''}
+                            />
+                        </InputAdornment>
+                    ),
                 }}
             />
 
@@ -225,17 +252,20 @@ const LandingPage = () => {
             ) : (
                 <Grid container spacing={4}>
                     {eventList.map((event, index) => {
+                        let eventDate = new Date(event.eventDate)
+                        .toLocaleDateString('en-GB', { timeZone: 'Asia/Ho_Chi_Minh', hour12: false } )
                         return (
                             <EventItem
                                 key={index}
                                 id={event.id}
                                 title={event.title}
                                 posterImg={event.posterImg}
-                                eventDate="29/07/2023"
-                                location="Ho Chi Minh"
+                                eventDate={eventDate}
+                                location={event.location}
                                 eventType={event.eventType}
                                 price={event.price}
                                 seatmap={event.seatmap}
+                                status={event.status}
                             />
                         );
                     })}

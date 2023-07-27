@@ -1,16 +1,20 @@
 import { Routes, Route } from "react-router-dom";
 import LandingPage from "../pages/LandingPage";
-import CreateEventPage from "../pages/CreateEventPage";
+import CreateEvent from "../pages/CreateEvent";
 import EventReportPage from "../pages/EventReportPage";
-import EventDetailPage from "../pages/EventDetailPage";
+import EventDetail from "../pages/EventDetail";
 import EventBookingPage from "../pages/EventBookingPage";
+import PublishEvent from "../pages/PublishEvent";
+import MyTicket from "../pages/MyTicket";
 
 const routes = [
     { 'path': '/', 'component': <LandingPage/> },
     { 'name': 'Home', 'path': '/browse_event', 'component': <LandingPage/> },
-    { 'name': 'Create Event', 'path': '/create_event', 'component': <CreateEventPage/> },
+    { 'name': 'My Ticket', 'path': '/my_ticket', 'component': <MyTicket/> },
+    { 'name': 'Create Event', 'path': '/create_event', 'component': <CreateEvent/> },
+    { 'name': 'Publish Event', 'path': '/publish_event', 'component': <PublishEvent/> },
     { 'name': 'Event Report', 'path': '/event_report', 'component': <EventReportPage/> },
-    { 'path': '/event_detail/:id', 'component': <EventDetailPage/> },
+    { 'path': '/event_detail/:id', 'component': <EventDetail/> },
     { 'path': '/event_booking', 'component': <EventBookingPage/> }
 ]
 
