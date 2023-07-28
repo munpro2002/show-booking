@@ -1,7 +1,7 @@
 import { routes } from '../../../routes';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, Alert } from '@mui/material';
 
-const Header = () => {
+const Header = (props: any) => {
     return (
         <>
             <Box
@@ -16,6 +16,21 @@ const Header = () => {
                     zIndex: 9999,
                 }}
             >
+                {
+                    props.successAlert &&
+                    <Alert severity="success"
+                        sx={{
+                            position: 'absolute',
+                            top: '20%',
+                            left: '42%',
+                            alignItems: 'center',
+                            height: '40px'
+                        }}
+                    >
+                        Successfully booked. <br/> Please check your email
+                    </Alert>
+                }
+                
                 <Typography
                     sx={{
                         marginBottom: '10px',
