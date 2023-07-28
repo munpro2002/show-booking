@@ -1,35 +1,67 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
 import { useNavigate } from 'react-router';
-import { Box, Typography, Button, Grid, TextField, InputAdornment, Alert } from '@mui/material';
+import {
+    Box,
+    Typography,
+    Button,
+    Grid,
+    TextField,
+    InputAdornment,
+    Alert,
+    CircularProgress,
+} from '@mui/material';
 import {
     faArrowLeft,
     faCalendar,
     faFilm,
     faLocationDot,
     faEnvelope,
-    faUser
+    faUser,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import axios from 'axios'
+import axios from 'axios';
 
-type EventDetailTitle = {
+type EventDetailTitleType = {
     title: string;
 };
 
 type Seat = {
     seatPos: number;
+    selected: boolean;
     seatSelectedArray: any;
     setSeatSelectedArray: any;
 };
 
-const handleGetSeatId = () => {
-    
-}
+const getSeatMap = async (seatMapId: string) => {
+    const response = await axios.get(
+        `http://localhost:3000/events/seatmap/${seatMapId}`
+    );
+    return response.data;
+};
 
-const handleBookingTicket = (formData: any) => {
-    console.log(formData)
-}
+const handleBookingTicket = async (formData: any, seatMapId: string) => {
+    const getAllSeatId = await getSeatMap(seatMapId);
+    const allSeatId = getAllSeatId
+        .filter((seat: any) => {
+            return formData.seats.includes(seat.seatPos);
+        })
+        .map((seat: any) => {
+            return seat.id;
+        });
+    try {
+        const response = await axios.post(
+            'http://localhost:3000/tickets/create_ticket',
+            {
+                ...formData,
+                seats_id: allSeatId,
+            }
+        );
+        return response.status;
+    } catch (err: any) {
+        return err.response.status;
+    }
+};
 
 const Back = () => {
     const navigation = useNavigate();
@@ -53,7 +85,7 @@ const Back = () => {
     );
 };
 
-const EventDetailTitle = (props: EventDetailTitle) => {
+const EventDetailTitle = (props: EventDetailTitleType) => {
     return (
         <Box
             sx={{
@@ -78,23 +110,28 @@ const EventDetailTitle = (props: EventDetailTitle) => {
 };
 
 const EventBooking = (props: any) => {
-    const [alert, setAlert] = useState('')
+    const navigation = useNavigate();
     const location = useLocation();
+    const [alert, setAlert] = useState('');
     const [focused, setFocused] = useState({
-        'email': false,
-        'name': false
-    })
+        email: false,
+        name: false,
+    });
     const [totalCost, setTotalCost] = useState(0);
     const [formData, setFormData] = useState({
-        name: '',
+        fullName: '',
         email: '',
         event_id: location.state.event.id,
-        seats: null as any
-    })
+        seats: null as any,
+    });
 
     useEffect(() => {
-        const seatSelectedArray = [...props.seatSelectedArray.normal, ...props.seatSelectedArray.vip, ...props.seatSelectedArray.sweetbox]
-        setFormData({...formData, seats: seatSelectedArray})
+        const seatSelectedArray = [
+            ...props.seatSelectedArray.normal,
+            ...props.seatSelectedArray.vip,
+            ...props.seatSelectedArray.sweetbox,
+        ];
+        setFormData({ ...formData, seats: seatSelectedArray });
         const price = {
             normal: location.state.event.price,
             vip: location.state.event.price * 2,
@@ -130,7 +167,9 @@ const EventBooking = (props: any) => {
             {/* Content */}
             <Grid container sx={{ gap: '20px' }}>
                 {/* Check seat and price */}
-                <Grid item xs={5}
+                <Grid
+                    item
+                    xs={5}
                     sx={{
                         display: 'flex',
                         flexDirection: 'column',
@@ -213,13 +252,18 @@ const EventBooking = (props: any) => {
                     {/* Input email and Name */}
                     <TextField
                         fullWidth
-                        type='email'
-                        placeholder='example123@email.com'
+                        type="email"
+                        placeholder="example123@email.com"
                         value={formData.email}
-                        onChange={(event) => setFormData({...formData, email: event.target.value})}
-                        onFocus={() => setFocused({...focused, email: true})}
-                        onBlur={() => setFocused({...focused, email: false})}
-                        label='Email address'
+                        onChange={(event) =>
+                            setFormData({
+                                ...formData,
+                                email: event.target.value,
+                            })
+                        }
+                        onFocus={() => setFocused({ ...focused, email: true })}
+                        onBlur={() => setFocused({ ...focused, email: false })}
+                        label="Email address"
                         sx={{
                             '& .MuiInputLabel-root.Mui-focused': {
                                 color: '#2DC275',
@@ -242,12 +286,17 @@ const EventBooking = (props: any) => {
                     />
                     <TextField
                         fullWidth
-                        value={formData.name}
-                        placeholder='Your full name'
-                        onChange={(event) => setFormData({...formData, name: event.target.value})}
-                        onFocus={() => setFocused({...focused, name: true})}
-                        onBlur={() => setFocused({...focused, name: false})}
-                        label='Name'
+                        value={formData.fullName}
+                        placeholder="Your full name"
+                        onChange={(event) =>
+                            setFormData({
+                                ...formData,
+                                fullName: event.target.value,
+                            })
+                        }
+                        onFocus={() => setFocused({ ...focused, name: true })}
+                        onBlur={() => setFocused({ ...focused, name: false })}
+                        label="Name"
                         sx={{
                             '& .MuiInputLabel-root.Mui-focused': {
                                 color: '#2DC275',
@@ -270,12 +319,35 @@ const EventBooking = (props: any) => {
                     />
                     <Button
                         onClick={() => {
-                            if (Object.values(formData).some(value => value === '' || value.length === 0)) {
-                                setAlert('error')
-                                setTimeout(() => setAlert(''), 2000)
+                            if (
+                                Object.values(formData).some(
+                                    (value) =>
+                                        value === '' || value.length === 0
+                                )
+                            ) {
+                                setAlert('error');
+                                setTimeout(() => setAlert(''), 2000);
                             } else {
-                                handleBookingTicket(formData)
-                                setAlert('success')
+                                setAlert('loading');
+                                handleBookingTicket(
+                                    formData,
+                                    location.state.event.seatmap.id
+                                ).then((statusCode) => {
+                                    if (statusCode === 400) {
+                                        setTimeout(
+                                            () => setAlert('error'),
+                                            1000
+                                        );
+                                        setTimeout(() => setAlert(''), 3000);
+                                    } else if (statusCode === 201) {
+                                        props.setSuccessAlert(true);
+                                        setTimeout(
+                                            () => props.setSuccessAlert(false),
+                                            3000
+                                        );
+                                        navigation('/my_ticket');
+                                    }
+                                });
                             }
                         }}
                         sx={{
@@ -291,32 +363,56 @@ const EventBooking = (props: any) => {
                     >
                         Submit booking
                     </Button>
-
-                    {
-                        alert === 'success' &&
-                        <Alert severity="success"
+                    {alert === 'loading' && (
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '20px',
+                                position: 'absolute',
+                                top: '103%',
+                                left: '15%',
+                            }}
+                        >
+                            <CircularProgress
+                                sx={{
+                                    color: '#2DC275',
+                                }}
+                            />
+                            <Typography
+                                sx={{
+                                    color: '#2DC275',
+                                }}
+                            >
+                                Booking your ticket...
+                            </Typography>
+                        </Box>
+                    )}
+                    {alert === 'success' && (
+                        <Alert
+                            severity="success"
                             sx={{
                                 position: 'absolute',
                                 top: '103%',
                                 width: '78%',
-                                alignItems: 'center'
+                                alignItems: 'center',
                             }}
                         >
-                            Successfully booked. <br/> Please check your email
+                            Successfully booked. <br /> Please check your email
                         </Alert>
-                    }
-                    {
-                        alert === 'error' &&
-                        <Alert severity="error"
+                    )}
+                    {alert === 'error' && (
+                        <Alert
+                            severity="error"
                             sx={{
                                 position: 'absolute',
                                 top: '103%',
-                                width: '78%'
+                                width: '78%',
                             }}
                         >
                             Something went wrong
                         </Alert>
-                    }
+                    )}
                 </Grid>
 
                 {/* Event information */}
@@ -512,6 +608,27 @@ const SeatMapAnnotation = () => {
                     Sweetbox (<b>{price.sweetbox} VND/seat</b>)
                 </Typography>
             </Box>
+
+            {/* Sweetbox */}
+            <Box
+                sx={{
+                    display: 'flex',
+                    gap: '10px',
+                    alignItems: 'center',
+                }}
+            >
+                <Box
+                    sx={{
+                        width: '15px',
+                        height: '15px',
+                        borderRadius: '50%',
+                        backgroundColor: 'gray',
+                    }}
+                ></Box>
+                <Typography>
+                    Unavailable
+                </Typography>
+            </Box>
         </Box>
     );
 };
@@ -568,12 +685,15 @@ const Seat = (props: Seat) => {
     return (
         <Box
             onClick={() => {
-                setSelected(!selected);
-                handleSetSeatSelectedArray(
-                    props.seatPos,
-                    props.seatSelectedArray,
-                    props.setSeatSelectedArray
-                );
+                if (props.selected) return;
+                else {
+                    setSelected(!selected);
+                    handleSetSeatSelectedArray(
+                        props.seatPos,
+                        props.seatSelectedArray,
+                        props.setSeatSelectedArray
+                    );
+                }
             }}
             sx={{
                 cursor: 'pointer',
@@ -583,10 +703,10 @@ const Seat = (props: Seat) => {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                border: `2px solid ${color}`,
-                backgroundColor: selected ? color : '',
+                border: `2px solid ${props.selected ? 'gray' : color}`,
+                backgroundColor: props.selected ? 'gray' : selected ? color : '',
                 '&:hover': {
-                    backgroundColor: color,
+                    backgroundColor: props.selected ? '' : color,
                 },
             }}
         >
@@ -596,7 +716,23 @@ const Seat = (props: Seat) => {
 };
 
 const SeatMap = (props: any) => {
+    const location = useLocation();
+    const [selectedSeat, setSelectedSeat] = useState<Array<number>>([]);
     const arraySeat = Array.from({ length: 100 }, (_, index) => index + 1);
+
+    useEffect(() => {
+        getSeatMap(location.state.event.seatmap.id).then((result) => {
+            const selectedSeat = result
+                .filter((seat: any) => {
+                    return seat.status === 'unavailable';
+                })
+                .map((seat: any) => {
+                    return seat.seatPos;
+                });
+            setSelectedSeat(selectedSeat);
+        });
+    }, []);
+
     return (
         <Box
             sx={{
@@ -636,6 +772,9 @@ const SeatMap = (props: any) => {
                         <Seat
                             key={index}
                             seatPos={seat}
+                            selected={
+                                selectedSeat.includes(seat) ? true : false
+                            }
                             seatSelectedArray={props.seatSelectedArray}
                             setSeatSelectedArray={props.setSeatSelectedArray}
                         />
@@ -646,7 +785,7 @@ const SeatMap = (props: any) => {
     );
 };
 
-const EventDetail = () => {
+const EventDetail = (props: any) => {
     const [seatSelectedArray, setSeatSelectedArray] = useState({
         normal: [],
         vip: [],
@@ -676,7 +815,10 @@ const EventDetail = () => {
                     />
                 </Grid>
                 <Grid item lg={6} sm={12}>
-                    <EventBooking seatSelectedArray={seatSelectedArray} />
+                    <EventBooking
+                        seatSelectedArray={seatSelectedArray}
+                        setSuccessAlert={props.setSuccessAlert}
+                    />
                 </Grid>
             </Grid>
         </Box>

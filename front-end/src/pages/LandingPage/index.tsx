@@ -33,8 +33,10 @@ type Type_EventItem = {
 };
 
 const handleGetPublishedEvents = async () => {
-    const response = await axios.get('http://localhost:3000/events/published');
-    return response.data;
+    const response = await axios.get('http://localhost:3000/events');
+    return response.data.filter((event: any) => {
+        return event.status === 'published'
+    });
 };
 
 const handleSearchPublishedEvent = async (keyword: string) => {

@@ -35,7 +35,7 @@ export class SeatsService {
     for (let seatPos = 1; seatPos <= 100; seatPos++) {
       const seat = this.seatRepository.create({
         seatPos: seatPos,
-        seatType: seatPos <= 20 ? 'normal' : seatPos <= 60 ? 'vip' : 'sweetbox',
+        seatType: seatPos <= 20 ? 'vip' : seatPos <= 80 ? 'normal' : 'sweetbox',
         seatmap: seatmap,
       });
       await this.seatRepository.save(seat);
