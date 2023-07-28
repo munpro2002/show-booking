@@ -34,8 +34,8 @@ const handleGetUserTickets = async (keyword: string, setLoading: any, setTicketL
 
 const TicketItem = (props: any) => {
     let cost;
-    if (props.seat.seatPos === 'normal') cost = props.event.price
-    else if (props.seat.seatPos === 'vip') cost = props.event.price * 2
+    if (props.seat.seatType === 'normal') cost = props.event.price
+    else if (props.seat.seatType === 'vip') cost = props.event.price * 2
     else cost = props.event.price * 1.5
 
     return (
