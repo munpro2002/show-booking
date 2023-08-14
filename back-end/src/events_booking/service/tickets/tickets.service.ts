@@ -5,14 +5,10 @@ import { Ticket } from 'src/typeorm/entities/Ticket';
 import { Seat } from 'src/typeorm/entities/Seat';
 import { Event } from 'src/typeorm/entities/Event';
 import { Customer } from 'src/typeorm/entities/Customer';
-import { EventsService } from '../events/events.service';
-import { SeatsService } from '../seats/seats.service';
 
 @Injectable()
 export class TicketsService {
   constructor(
-    private eventsService: EventsService,
-    private seatsService: SeatsService,
     @InjectRepository(Ticket) private ticketRepository: Repository<Ticket>,
   ) {}
 
